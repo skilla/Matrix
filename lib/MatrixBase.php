@@ -43,6 +43,21 @@ class MatrixBase
         return $this->getNumRows() == 0;
     }
 
+    public function isScalar()
+    {
+        return $this->getNumRows() == 1 && $this->getNumCols() == 1;
+    }
+
+    public function isRowVector()
+    {
+        return $this->getNumRows() == 1 && $this->getNumCols()>1;
+    }
+
+    public function isColVector()
+    {
+        return $this->getNumRows() > 1 && $this->getNumCols()==1;
+    }
+
     public function isSquare()
     {
         $isSquare = false;
@@ -54,66 +69,117 @@ class MatrixBase
         return $isSquare;
     }
 
-    public function isDiagonalZero()
+    private function _sumDiagonal($functionName)
     {
-        $isDiagonal = $this->isSquare() && $this->getNumRows()>1;
+        $sum = 0;
+        for ($i = 1; $i <= $this->getNumRows(); $i++) {
+            $sum += (int)call_user_func(array($this, $functionName), $this->matriz[$i][$i]);
+        }
+        return $sum;
+    }
+
+    private function equalZero($a)
+    {
+        return $a == 0;
+    }
+
+    private function equalUnit($a)
+    {
+        return $a == 1;
+    }
+
+    private function greaterZero($a)
+    {
+        return $a >= 1;
+    }
+
+    private function _isDiagonalZero()
+    {
+        $isDiagonal = $this->isSquare() && $this->getNumRows() > 1;
         if ($isDiagonal) {
-            for ($i = 1; $i <= $this->getNumRows() && $isDiagonal; $i++) {
-                if ($this->matriz[$i][$i] != 0) {
-                    $isDiagonal = false;
-                }
-            }
+            $isDiagonal = $this->_sumDiagonal('equalZero') == $this->getNumRows();
         }
         return $isDiagonal;
     }
 
-    public function isDiagonalUnit()
+    private function _isDiagonalUnit()
     {
-        $isDiagonal = $this->isSquare() && $this->getNumRows()>1;
+        $isDiagonal = $this->isSquare() && $this->getNumRows() > 1;
         if ($isDiagonal) {
-            for ($i = 1; $i <= $this->getNumRows() && $isDiagonal; $i++) {
-                if ($this->matriz[$i][$i] != 0) {
-                    $isDiagonal = false;
-                }
-            }
+            $isDiagonal = $this->_sumDiagonal('equalUnit') == $this->getNumRows();
         }
         return $isDiagonal;
     }
 
-    public function isDiagonalUpper()
+    private function _isTriangularUpperZero()
     {
-        $isDiagonal = $this->isSquare() && $this->getNumRows()>1;
-        if ($isDiagonal) {
-            for ($i = 1; $i <= $this->getNumRows() && $isDiagonal; $i++) {
-                for ($j = $i+1; $j <= $this->getNumCols() && $isDiagonal; $j++) {
-                    if ($this->matriz[$i][$j] != 0) {
-                        $isDiagonal = false;
-                    }
+        $isZero = true;
+        for ($i = 1; $i <= $this->getNumRows() && $isZero; $i++) {
+            for ($j = $i + 1; $j <= $this->getNumCols() && $isZero; $j++) {
+                if ($this->matriz[$i][$j] != 0) {
+                    $isZero = false;
                 }
             }
         }
-        return $isDiagonal;
+        return $isZero;
     }
 
-    public function isDiagonalLower()
+    private function _isTriangularLowerZero()
     {
-        $isDiagonal = $this->isSquare() && $this->getNumRows()>1;
-        if ($isDiagonal) {
-            for ($i = 2; $i <= $this->getNumRows() && $isDiagonal; $i++) {
-                for ($j = 1; $j <= $i && $isDiagonal; $j++) {
-                    if ($this->matriz[$i][$j] != 0) {
-                        $isDiagonal = false;
-                    }
+        $isZero = true;
+        for ($i = 2; $i <= $this->getNumRows() && $isZero; $i++) {
+            for ($j = 1; $j < $i && $isZero; $j++) {
+                if ($this->matriz[$i][$j] != 0) {
+                    $isZero = false;
                 }
             }
         }
-        return $isDiagonal;
+        return $isZero;
+    }
+
+    public function isTriangularUpper()
+    {
+        return
+            $this->isSquare() &&
+            $this->getNumRows() > 1 &&
+            !$this->_isDiagonalZero() &&
+            $this->_isTriangularLowerZero() &&
+            !$this->_isTriangularUpperZero();
+    }
+
+    public function isTriangularLower()
+    {
+        return
+            $this->isSquare() &&
+            $this->getNumRows() > 1 &&
+            !$this->_isDiagonalZero() &&
+            !$this->_isTriangularLowerZero() &&
+            $this->_isTriangularUpperZero();
     }
 
     public function isDiagonal()
     {
-        return $this->isDiagonalUpper() && $this->isDiagonalLower();
+        return
+            $this->isSquare() &&
+            $this->getNumRows() > 1 &&
+            $this->_isTriangularUpperZero() &&
+            $this->_isTriangularLowerZero() &&
+            !$this->_isDiagonalZero();
     }
 
-    public function
+    public function isDiagonalUnit()
+    {
+        return
+            $this->isSquare() &&
+            $this->getNumRows() > 1 &&
+            $this->_isTriangularUpperZero() &&
+            $this->_isTriangularLowerZero() &&
+            !$this->_isDiagonalZero();
+    }
+
+    public function isDiagonalScalar()
+    {
+        $isScalar = $this->isSquare() && $$this->_isTriangularUpperZero() && $this->_isTriangularLowerZero();
+        for
+    }
 }
