@@ -20,7 +20,7 @@ class MatrixBase
             for ($i = 1; $i <= $m; $i++) {
                 $this->matriz[$i] = array();
                 for ($j = 1; $j <= $n; $j++) {
-                    $this->matriz[$i][$j] == 0;
+                    $this->matriz[$i][$j] = 0;
                 }
             }
         }
@@ -165,6 +165,16 @@ class MatrixBase
             $this->_isTriangularUpperZero();
     }
 
+    public function isZero()
+    {
+        return
+            $this->isSquare() &&
+            $this->getNumRows() > 1 &&
+            $this->_isDiagonalZero() &&
+            $this->_isTriangularLowerZero() &&
+            $this->_isTriangularUpperZero();
+    }
+
     public function isDiagonal()
     {
         return
@@ -225,10 +235,10 @@ class MatrixBase
         return $equals;
     }
 
-    public function tr()
+    public function transposed()
     {
         $class = get_class($this);
-        $tr = new $class($this->getNumRows(), $this->getNumCols());
+        $tr = new $class($this->getNumCols(), $this->getNumRows());
         for ($i = 1; $i <= $this->getNumRows(); $i++) {
             for ($j = 1; $j <= $this->getNumCols(); $j++) {
                 $tr->setPoint($j, $i, $this->getPoint($i, $j));
@@ -239,27 +249,108 @@ class MatrixBase
 
     public function isSymmetric()
     {
-        $tr = $this->tr();
+        $tr = $this->transposed();
         return $this->isMatrixEquals($tr);
     }
 
-    public function determinante()
+    public function getAdjunto($i, $j)
+    {
+        $class = get_class($this);
+        $tr = new $class($this->getNumRows() - 1, $this->getNumCols() - 1);
+
+    }
+
+    public function determinant()
     {
         if ($this->isSquare()) {
+            if ($this->getNumRows()==1) {
+                $determinante = $this->getPoint(1, 1);
+                return $determinante;
+            }
             if ($this->getNumRows()==2) {
-                return
+                $determinante =
                     ($this->getPoint(1, 1) * $this->getPoint(2, 2)) -
                     ($this->getPoint(1, 2) * $this->getPoint(2, 1));
+                return $determinante;
             }
             if ($this->getNumRows()==3) {
-                return
+                $determinante =
                     ($this->getPoint(1, 1) * $this->getPoint(2, 2) * $this->getPoint(3, 3)) +
                     ($this->getPoint(1, 2) * $this->getPoint(2, 3) * $this->getPoint(3, 1)) +
                     ($this->getPoint(1, 3) * $this->getPoint(2, 1) * $this->getPoint(3, 2)) -
                     ($this->getPoint(1, 3) * $this->getPoint(2, 2) * $this->getPoint(3, 1)) -
                     ($this->getPoint(1, 2) * $this->getPoint(2, 1) * $this->getPoint(3, 3)) -
                     ($this->getPoint(1, 1) * $this->getPoint(2, 3) * $this->getPoint(3, 2));
+                return $determinante;
+            }
+            if ($this->getNumRows()>3) {
+                $determinante = 0;
+                for ($j=1; $j<=$this->getNumCols(); $j++) {
+                    $determinante += $this->getPoint(1, $j) * pow(-1, 1+$j) * $this->getAdjunto(1, $j)->determinant();
+                }
+                return $determinante;
             }
         }
+    }
+
+    public function trace()
+    {
+        $trace = 0;
+        for ($i=1; $i<=$this->getNumRows(); $i++) {
+            $trace = $this->getPoint($i, $i);
+        }
+        return $trace;
+    }
+
+    public function summation(MatrixBase $base)
+    {
+        $class = get_class($this);
+        $tr = new $class($this->getNumRows(), $this->getNumCols());
+        for ($i = 1; $i <= $this->getNumRows(); $i++) {
+            for ($j = 1; $j <= $this->getNumCols(); $j++) {
+                $tr->setPoint($i, $j, $this->getPoint($i, $j) + $base->getPoint($i, $j));
+            }
+        }
+        return $tr;
+    }
+
+    public function subtraction(MatrixBase $base)
+    {
+        $class = get_class($this);
+        $tr = new $class($this->getNumRows(), $this->getNumCols());
+        for ($i = 1; $i <= $this->getNumRows(); $i++) {
+            for ($j = 1; $j <= $this->getNumCols(); $j++) {
+                $tr->setPoint($i, $j, $this->getPoint($i, $j) - $base->getPoint($i, $j));
+            }
+        }
+        return $tr;
+    }
+
+    public function multiplicationScalar($scalar)
+    {
+        $class = get_class($this);
+        $tr = new $class($this->getNumRows(), $this->getNumCols());
+        for ($i = 1; $i <= $this->getNumRows(); $i++) {
+            for ($j = 1; $j <= $this->getNumCols(); $j++) {
+                $tr->setPoint($i, $j, $this->getPoint($i, $j) * $scalar);
+            }
+        }
+        return $tr;
+    }
+
+    public function multiplicationMatrix(MatrixBase $base)
+    {
+        $class = get_class($this);
+        $tr = new $class($this->getNumRows(), $this->getNumCols());
+        for ($i = 1; $i <= $this->getNumRows(); $i++) {
+            for ($j = 1; $j <= $this->getNumCols(); $j++) {
+                $suma = 0;
+                for ($c=1; $c<=$this->getNumCols(); $c++) {
+                    $suma += $this->getPoint($i, $c) * $base->getPoint($c, $j);
+                }
+                $tr->setPoint($i, $j, $suma);
+            }
+        }
+        return $tr;
     }
 }
