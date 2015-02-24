@@ -225,10 +225,10 @@ class MatrixBase
         return $equals;
     }
 
-    public function tr()
+    public function transposed()
     {
         $class = get_class($this);
-        $tr = new $class($this->getNumRows(), $this->getNumCols());
+        $tr = new $class($this->getNumCols(), $this->getNumRows());
         for ($i = 1; $i <= $this->getNumRows(); $i++) {
             for ($j = 1; $j <= $this->getNumCols(); $j++) {
                 $tr->setPoint($j, $i, $this->getPoint($i, $j));
@@ -239,13 +239,16 @@ class MatrixBase
 
     public function isSymmetric()
     {
-        $tr = $this->tr();
+        $tr = $this->transposed();
         return $this->isMatrixEquals($tr);
     }
 
-    public function determinante()
+    public function determinant()
     {
         if ($this->isSquare()) {
+            if ($this->getNumRows()==1) {
+                return $this->getPoint(1, 1);
+            }
             if ($this->getNumRows()==2) {
                 return
                     ($this->getPoint(1, 1) * $this->getPoint(2, 2)) -
@@ -260,6 +263,45 @@ class MatrixBase
                     ($this->getPoint(1, 2) * $this->getPoint(2, 1) * $this->getPoint(3, 3)) -
                     ($this->getPoint(1, 1) * $this->getPoint(2, 3) * $this->getPoint(3, 2));
             }
+            if ($this->getNumRows()>3) {
+                /**
+                 * TODO http://recursostic.educacion.es/descartes/web/materiales_didacticos/Determinantes_1/determinantes.htm
+                 */
+                return 0;
+            }
         }
+    }
+
+    public function trace()
+    {
+        $trace = 0;
+        for ($i=1; $i<=$this->getNumRows(); $i++) {
+            $trace = $this->getPoint($i, $i);
+        }
+        return $trace;
+    }
+
+    public function summation(MatrixBase $base)
+    {
+        $class = get_class($this);
+        $tr = new $class($this->getNumRows(), $this->getNumCols());
+        for ($i = 1; $i <= $this->getNumRows(); $i++) {
+            for ($j = 1; $j <= $this->getNumCols(); $j++) {
+                $tr->setPoint($i, $j, $this->getPoint($i, $j) + $base->getPoint($i, $j));
+            }
+        }
+        return $tr;
+    }
+
+    public function multiplicationScalar($scalar)
+    {
+        $class = get_class($this);
+        $tr = new $class($this->getNumRows(), $this->getNumCols());
+        for ($i = 1; $i <= $this->getNumRows(); $i++) {
+            for ($j = 1; $j <= $this->getNumCols(); $j++) {
+                $tr->setPoint($i, $j, $this->getPoint($i, $j) * $scalar);
+            }
+        }
+        return $tr;
     }
 }
