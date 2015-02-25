@@ -77,7 +77,7 @@ class MatrixBase
         return $isSquare;
     }
 
-    private function _sumDiagonal($functionName)
+    private function privateSumDiagonal($functionName)
     {
         $sum = 0;
         for ($i = 1; $i <= $this->getNumRows(); $i++) {
@@ -101,25 +101,25 @@ class MatrixBase
         return $a >= 1;
     }
 
-    private function _isDiagonalZero()
+    private function privateIsDiagonalZero()
     {
         $isDiagonal = $this->isSquare() && $this->getNumRows() > 1;
         if ($isDiagonal) {
-            $isDiagonal = $this->_sumDiagonal('equalZero') == $this->getNumRows();
+            $isDiagonal = $this->privateSumDiagonal('equalZero') == $this->getNumRows();
         }
         return $isDiagonal;
     }
 
-    private function _isDiagonalUnit()
+    private function privateIsDiagonalUnit()
     {
         $isDiagonal = $this->isSquare() && $this->getNumRows() > 1;
         if ($isDiagonal) {
-            $isDiagonal = $this->_sumDiagonal('equalUnit') == $this->getNumRows();
+            $isDiagonal = $this->privateSumDiagonal('equalUnit') == $this->getNumRows();
         }
         return $isDiagonal;
     }
 
-    private function _isTriangularUpperZero()
+    private function privateIsTriangularUpperZero()
     {
         $isZero = true;
         for ($i = 1; $i <= $this->getNumRows() && $isZero; $i++) {
@@ -132,7 +132,7 @@ class MatrixBase
         return $isZero;
     }
 
-    private function _isTriangularLowerZero()
+    private function privateIsTriangularLowerZero()
     {
         $isZero = true;
         for ($i = 2; $i <= $this->getNumRows() && $isZero; $i++) {
@@ -150,9 +150,9 @@ class MatrixBase
         return
             $this->isSquare() &&
             $this->getNumRows() > 1 &&
-            !$this->_isDiagonalZero() &&
-            $this->_isTriangularLowerZero() &&
-            !$this->_isTriangularUpperZero();
+            !$this->privateIsDiagonalZero() &&
+            $this->privateIsTriangularLowerZero() &&
+            !$this->privateIsTriangularUpperZero();
     }
 
     public function isTriangularLower()
@@ -160,9 +160,9 @@ class MatrixBase
         return
             $this->isSquare() &&
             $this->getNumRows() > 1 &&
-            !$this->_isDiagonalZero() &&
-            !$this->_isTriangularLowerZero() &&
-            $this->_isTriangularUpperZero();
+            !$this->privateIsDiagonalZero() &&
+            !$this->privateIsTriangularLowerZero() &&
+            $this->privateIsTriangularUpperZero();
     }
 
     public function isZero()
@@ -170,9 +170,9 @@ class MatrixBase
         return
             $this->isSquare() &&
             $this->getNumRows() > 1 &&
-            $this->_isDiagonalZero() &&
-            $this->_isTriangularLowerZero() &&
-            $this->_isTriangularUpperZero();
+            $this->privateIsDiagonalZero() &&
+            $this->privateIsTriangularLowerZero() &&
+            $this->privateIsTriangularUpperZero();
     }
 
     public function isDiagonal()
@@ -180,14 +180,14 @@ class MatrixBase
         return
             $this->isSquare() &&
             $this->getNumRows() > 1 &&
-            $this->_isTriangularUpperZero() &&
-            $this->_isTriangularLowerZero() &&
-            !$this->_isDiagonalZero();
+            $this->privateIsTriangularUpperZero() &&
+            $this->privateIsTriangularLowerZero() &&
+            !$this->privateIsDiagonalZero();
     }
 
     public function isDiagonalUnit()
     {
-        return $this->isDiagonal() && $this->_isDiagonalUnit();
+        return $this->isDiagonal() && $this->privateIsDiagonalUnit();
     }
 
     public function isDiagonalScalar()
@@ -238,6 +238,9 @@ class MatrixBase
     public function transposed()
     {
         $class = get_class($this);
+        /**
+         * @var MatrixBase $tr
+         */
         $tr = new $class($this->getNumCols(), $this->getNumRows());
         for ($i = 1; $i <= $this->getNumRows(); $i++) {
             for ($j = 1; $j <= $this->getNumCols(); $j++) {
@@ -256,6 +259,9 @@ class MatrixBase
     public function getAdjunto($i, $j)
     {
         $class = get_class($this);
+        /**
+         * @var MatrixBase $tr
+         */
         $tr = new $class($this->getNumRows() - 1, $this->getNumCols() - 1);
         for ($m=1; $m<=$this->getNumRows(); $m++) {
             for ($n=1; $n<=$this->getNumCols(); $n++) {
@@ -272,16 +278,15 @@ class MatrixBase
 
     public function determinant()
     {
+        $determinante = 0;
         if ($this->isSquare()) {
             if ($this->getNumRows()==1) {
                 $determinante = $this->getPoint(1, 1);
-                return $determinante;
             }
             if ($this->getNumRows()==2) {
                 $determinante =
                     ($this->getPoint(1, 1) * $this->getPoint(2, 2)) -
                     ($this->getPoint(1, 2) * $this->getPoint(2, 1));
-                return $determinante;
             }
             if ($this->getNumRows()==3) {
                 $determinante =
@@ -291,7 +296,6 @@ class MatrixBase
                     ($this->getPoint(1, 3) * $this->getPoint(2, 2) * $this->getPoint(3, 1)) -
                     ($this->getPoint(1, 2) * $this->getPoint(2, 1) * $this->getPoint(3, 3)) -
                     ($this->getPoint(1, 1) * $this->getPoint(2, 3) * $this->getPoint(3, 2));
-                return $determinante;
             }
             if ($this->getNumRows()>3) {
                 $determinante = 0;
@@ -301,6 +305,7 @@ class MatrixBase
                 return $determinante;
             }
         }
+        return $determinante;
     }
 
     public function trace()
@@ -315,6 +320,9 @@ class MatrixBase
     public function summation(MatrixBase $base)
     {
         $class = get_class($this);
+        /**
+         * @var MatrixBase $tr
+         */
         $tr = new $class($this->getNumRows(), $this->getNumCols());
         for ($i = 1; $i <= $this->getNumRows(); $i++) {
             for ($j = 1; $j <= $this->getNumCols(); $j++) {
@@ -327,6 +335,9 @@ class MatrixBase
     public function subtraction(MatrixBase $base)
     {
         $class = get_class($this);
+        /**
+         * @var MatrixBase $tr
+         */
         $tr = new $class($this->getNumRows(), $this->getNumCols());
         for ($i = 1; $i <= $this->getNumRows(); $i++) {
             for ($j = 1; $j <= $this->getNumCols(); $j++) {
@@ -339,6 +350,9 @@ class MatrixBase
     public function multiplicationScalar($scalar)
     {
         $class = get_class($this);
+        /**
+         * @var MatrixBase $tr
+         */
         $tr = new $class($this->getNumRows(), $this->getNumCols());
         for ($i = 1; $i <= $this->getNumRows(); $i++) {
             for ($j = 1; $j <= $this->getNumCols(); $j++) {
@@ -351,6 +365,9 @@ class MatrixBase
     public function multiplicationMatrix(MatrixBase $base)
     {
         $class = get_class($this);
+        /**
+         * @var MatrixBase $tr
+         */
         $tr = new $class($this->getNumRows(), $this->getNumCols());
         for ($i = 1; $i <= $this->getNumRows(); $i++) {
             for ($j = 1; $j <= $this->getNumCols(); $j++) {
