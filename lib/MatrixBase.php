@@ -257,7 +257,17 @@ class MatrixBase
     {
         $class = get_class($this);
         $tr = new $class($this->getNumRows() - 1, $this->getNumCols() - 1);
-
+        for ($m=1; $m<=$this->getNumRows(); $m++) {
+            for ($n=1; $n<=$this->getNumCols(); $n++) {
+                if ($m==$i || $n==$j) {
+                    continue;
+                }
+                $row = ($m<$i) ? $m : $m-1;
+                $col = ($n<$j) ? $n : $n-1;
+                $tr->setPoint($row, $col, $this->getPoint($m, $n));
+            }
+        }
+        return $tr;
     }
 
     public function determinant()

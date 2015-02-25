@@ -180,4 +180,36 @@ class MatrixBaseTest extends PHPUnit_Framework_TestCase
         $this->assertTrue($matriz->isSymmetric());
         return $matriz;
     }
+
+    public function testAdjuntoOrden2()
+    {
+        $matriz = new \skilla\matrix\MatrixBase(2, 2);
+        $matriz->setPoint(1, 1, 1);
+        $matriz->setPoint(1, 2, 2);
+        $matriz->setPoint(2, 1, 3);
+        $matriz->setPoint(2, 2, 4);
+        $tmp = new \skilla\matrix\MatrixBase(1, 1);
+        $tmp->setPoint(1, 1, 4);
+        $this->assertTrue($tmp->isMatrixEquals($matriz->getAdjunto(1, 1)));
+    }
+
+    public function testAdjuntoOrden3()
+    {
+        $matriz = new \skilla\matrix\MatrixBase(3, 3);
+        $matriz->setPoint(1, 1, 1);
+        $matriz->setPoint(1, 2, 2);
+        $matriz->setPoint(1, 3, 3);
+        $matriz->setPoint(2, 1, 4);
+        $matriz->setPoint(2, 2, 5);
+        $matriz->setPoint(2, 3, 6);
+        $matriz->setPoint(3, 1, 7);
+        $matriz->setPoint(3, 2, 8);
+        $matriz->setPoint(3, 3, 9);
+        $tmp = new \skilla\matrix\MatrixBase(2, 2);
+        $tmp->setPoint(1, 1, 1);
+        $tmp->setPoint(1, 2, 3);
+        $tmp->setPoint(2, 1, 7);
+        $tmp->setPoint(2, 2, 9);
+        $this->assertTrue($tmp->isMatrixEquals($matriz->getAdjunto(1, 1)));
+    }
 }
