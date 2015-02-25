@@ -184,13 +184,14 @@ class MatrixBaseTest extends PHPUnit_Framework_TestCase
     public function testAdjuntoOrden2()
     {
         $matriz = new \skilla\matrix\MatrixBase(2, 2);
-        $matriz->setPoint(1, 1, 1);
-        $matriz->setPoint(1, 2, 2);
-        $matriz->setPoint(2, 1, 3);
+        $matriz->setPoint(1, 1, 7);
+        $matriz->setPoint(1, 2, -3);
+        $matriz->setPoint(2, 1, -4);
         $matriz->setPoint(2, 2, 4);
         $tmp = new \skilla\matrix\MatrixBase(1, 1);
         $tmp->setPoint(1, 1, 4);
         $this->assertTrue($tmp->isMatrixEquals($matriz->getAdjunto(1, 1)));
+        return $matriz;
     }
 
     public function testAdjuntoOrden3()
@@ -210,6 +211,80 @@ class MatrixBaseTest extends PHPUnit_Framework_TestCase
         $tmp->setPoint(1, 2, 3);
         $tmp->setPoint(2, 1, 7);
         $tmp->setPoint(2, 2, 9);
-        $this->assertTrue($tmp->isMatrixEquals($matriz->getAdjunto(1, 1)));
+        $this->assertTrue($tmp->isMatrixEquals($matriz->getAdjunto(2, 2)));
+        return $matriz;
+    }
+
+    public function testAdjuntoOrden4()
+    {
+        $matriz = new \skilla\matrix\MatrixBase(4, 4);
+        $matriz->setPoint(1, 1, 1);
+        $matriz->setPoint(1, 2, 2);
+        $matriz->setPoint(1, 3, 3);
+        $matriz->setPoint(1, 4, 4);
+        $matriz->setPoint(2, 1, 5);
+        $matriz->setPoint(2, 2, 6);
+        $matriz->setPoint(2, 3, 7);
+        $matriz->setPoint(2, 4, 8);
+        $matriz->setPoint(3, 1, 9);
+        $matriz->setPoint(3, 2, 0);
+        $matriz->setPoint(3, 3, 1);
+        $matriz->setPoint(3, 4, 2);
+        $matriz->setPoint(4, 1, 3);
+        $matriz->setPoint(4, 2, 4);
+        $matriz->setPoint(4, 3, 5);
+        $matriz->setPoint(4, 4, 6);
+        $tmp = new \skilla\matrix\MatrixBase(3, 3);
+        $tmp->setPoint(1, 1, 1);
+        $tmp->setPoint(1, 2, 3);
+        $tmp->setPoint(1, 3, 4);
+        $tmp->setPoint(2, 1, 9);
+        $tmp->setPoint(2, 2, 1);
+        $tmp->setPoint(2, 3, 2);
+        $tmp->setPoint(3, 1, 3);
+        $tmp->setPoint(3, 2, 5);
+        $tmp->setPoint(3, 3, 6);
+        $this->assertTrue($tmp->isMatrixEquals($matriz->getAdjunto(2, 2)));
+        $this->assertFalse($tmp->isMatrixEquals($matriz->getAdjunto(3, 2)));
+        return $matriz;
+    }
+
+    public function testDeterminateOrden1()
+    {
+        $matriz = new \skilla\matrix\MatrixBase(1, 1);
+        $matriz->setPoint(1, 1, 8);
+        $this->assertEquals(8, $matriz->determinant());
+    }
+
+    /**
+     * @depends testAdjuntoOrden2
+     */
+    public function testDeterminateOrden2(\skilla\matrix\MatrixBase $matriz)
+    {
+        $this->assertEquals(16, $matriz->determinant());
+    }
+
+    /**
+     * @depends testAdjuntoOrden3
+     */
+    public function testDeterminateOrden3(\skilla\matrix\MatrixBase $matriz)
+    {
+        $this->assertEquals(0, $matriz->determinant());
+    }
+
+    /**
+     * @depends testAdjuntoOrden4
+     */
+    public function testDeterminateOrden4(\skilla\matrix\MatrixBase $matriz)
+    {
+        $this->assertEquals(0, $matriz->determinant());
+    }
+
+    /**
+     * @depends testAdjuntoOrden4
+     */
+    public function testTrazaOrden4(\skilla\matrix\MatrixBase $matriz)
+    {
+        $this->assertEquals(14, $matriz->trace());
     }
 }

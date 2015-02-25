@@ -307,7 +307,7 @@ class MatrixBase
     {
         $trace = 0;
         for ($i=1; $i<=$this->getNumRows(); $i++) {
-            $trace = $this->getPoint($i, $i);
+            $trace += $this->getPoint($i, $i);
         }
         return $trace;
     }
