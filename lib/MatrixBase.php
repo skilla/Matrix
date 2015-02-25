@@ -20,7 +20,7 @@ class MatrixBase
             for ($i = 1; $i <= $m; $i++) {
                 $this->matriz[$i] = array();
                 for ($j = 1; $j <= $n; $j++) {
-                    $this->matriz[$i][$j] = 0;
+                    $this->matriz[$i][$j] = 0.0;
                 }
             }
         }
@@ -69,7 +69,7 @@ class MatrixBase
      */
     public function setPoint($row, $col, $value)
     {
-        $this->matriz[$row][$col] = $value;
+        $this->matriz[$row][$col] = $value*1.0;
     }
 
     /**
@@ -326,8 +326,8 @@ class MatrixBase
             return false;
         }
         $equals = true;
-        for ($i = 1; $i < $this->getNumRows() && $equals; $i++) {
-            for ($j = 1; $j < $this->getNumCols() && $equals; $j++) {
+        for ($i = 1; $i <= $this->getNumRows() && $equals; $i++) {
+            for ($j = 1; $j <= $this->getNumCols() && $equals; $j++) {
                 $equals = $this->getPoint($i, $j) == $base->getPoint($i, $j);
             }
         }
@@ -498,11 +498,11 @@ class MatrixBase
         /**
          * @var MatrixBase $tr
          */
-        $tr = new $class($this->getNumRows(), $this->getNumCols());
-        for ($i = 1; $i <= $this->getNumRows(); $i++) {
-            for ($j = 1; $j <= $this->getNumCols(); $j++) {
+        $tr = new $class($this->getNumRows(), $base->getNumCols());
+        for ($i = 1; $i <= $tr->getNumRows(); $i++) {
+            for ($j = 1; $j <= $tr->getNumCols(); $j++) {
                 $suma = 0;
-                for ($c=1; $c<=$this->getNumCols(); $c++) {
+                for ($c=1; $c<=$tr->getNumCols(); $c++) {
                     $suma += $this->getPoint($i, $c) * $base->getPoint($c, $j);
                 }
                 $tr->setPoint($i, $j, $suma);
@@ -524,79 +524,89 @@ class MatrixBase
         for ($i=1; $i<=$this->getNumRows(); $i++) {
             $inversa->setPoint($i, $i, 1);
         }
-        for ($j=1; $j<$this->getNumCols(); $j++) {
-            for ($i=$j+1; $i<=$this->getNumRows(); $i++) {
-                if ($this->getPoint($i, $j)!=0) {
-                    $opivote  = $this->getRow($j);
-                    $ocambio  = $this->getRow($i);
-                    $ipivote  = $inversa->getRow($j);
-                    $icambio  = $inversa->getRow($i);
-                    $opivote1 = $opivote->getPoint(1, $j);
-                    $ocambio1 = $ocambio->getPoint(1, $j);
-                    if ($ocambio1==$opivote1) {
-                        $ocambio = $ocambio->subtraction($opivote);
-                        $icambio = $icambio->subtraction($ipivote);
-                    } elseif (abs($ocambio1)==abs($opivote1)) {
-                        $ocambio = $ocambio->summation($opivote);
-                        $icambio = $icambio->summation($ipivote);
-                    } else {
-                        $opivote  = $opivote->multiplicationScalar(abs($ocambio1));
-                        $ocambio  = $ocambio->multiplicationScalar(abs($opivote1));
-                        $ipivote  = $ipivote->multiplicationScalar(abs($ocambio1));
-                        $icambio  = $icambio->multiplicationScalar(abs($opivote1));
-                        if ($this->sign($ocambio1)!=$this->sign($opivote1)) {
-                            $ocambio = $ocambio->summation($opivote);
-                            $icambio = $icambio->summation($ipivote);
-                        } else {
-                            $ocambio = $ocambio->subtraction($opivote);
-                            $icambio = $icambio->subtraction($ipivote);
-                        }
-                    }
-                    $this->setRow($i, $ocambio);
-                    $inversa->setRow($i, $icambio);
-                }
-            }
-        }
-        for ($j=$this->getNumCols(); $j>1; $j--) {
-            for ($i=$j-1; $i>=1; $i--) {
-                if ($this->getPoint($i, $j)!=0) {
-                    $opivote  = $this->getRow($j);
-                    $ocambio  = $this->getRow($i);
-                    $ipivote  = $inversa->getRow($j);
-                    $icambio  = $inversa->getRow($i);
-                    $opivote1 = $opivote->getPoint(1, $j);
-                    $ocambio1 = $ocambio->getPoint(1, $j);
-                    if ($ocambio1==$opivote1) {
-                        $ocambio = $ocambio->subtraction($opivote);
-                        $icambio = $icambio->subtraction($ipivote);
-                    } elseif (abs($ocambio1)==abs($opivote1)) {
-                        $ocambio = $ocambio->summation($opivote);
-                        $icambio = $icambio->summation($ipivote);
-                    } else {
-                        $opivote  = $opivote->multiplicationScalar(abs($ocambio1));
-                        $ocambio  = $ocambio->multiplicationScalar(abs($opivote1));
-                        $ipivote  = $ipivote->multiplicationScalar(abs($ocambio1));
-                        $icambio  = $icambio->multiplicationScalar(abs($opivote1));
-                        if ($this->sign($ocambio1)!=$this->sign($opivote1)) {
-                            $ocambio = $ocambio->summation($opivote);
-                            $icambio = $icambio->summation($ipivote);
-                        } else {
-                            $ocambio = $ocambio->subtraction($opivote);
-                            $icambio = $icambio->subtraction($ipivote);
-                        }
-                    }
-                    $this->setRow($i, $ocambio);
-                    $inversa->setRow($i, $icambio);
-                }
-            }
-        }
+        $class = get_class($this);
+        /**
+         * @var MatrixBase $inversa
+         */
+        $copia = new $class($this->getNumRows(), $this->getNumCols());
         for ($i=1; $i<=$this->getNumRows(); $i++) {
+            for ($j=1; $j<=$this->getNumRows(); $j++) {
+                $copia->setPoint($i, $j, $this->getPoint($i, $j));
+            }
+        }
+        for ($j=1; $j<$copia->getNumCols(); $j++) {
+            for ($i=$j+1; $i<=$copia->getNumRows(); $i++) {
+                if ($copia->getPoint($i, $j)!=0) {
+                    $opivote  = $copia->getRow($j);
+                    $ocambio  = $copia->getRow($i);
+                    $ipivote  = $inversa->getRow($j);
+                    $icambio  = $inversa->getRow($i);
+                    $opivote1 = $opivote->getPoint(1, $j);
+                    $ocambio1 = $ocambio->getPoint(1, $j);
+                    if ($ocambio1==$opivote1) {
+                        $ocambio = $ocambio->subtraction($opivote);
+                        $icambio = $icambio->subtraction($ipivote);
+                    } elseif (abs($ocambio1)==abs($opivote1)) {
+                        $ocambio = $ocambio->summation($opivote);
+                        $icambio = $icambio->summation($ipivote);
+                    } else {
+                        $opivote  = $opivote->multiplicationScalar(abs($ocambio1));
+                        $ocambio  = $ocambio->multiplicationScalar(abs($opivote1));
+                        $ipivote  = $ipivote->multiplicationScalar(abs($ocambio1));
+                        $icambio  = $icambio->multiplicationScalar(abs($opivote1));
+                        if ($copia->sign($ocambio1)!=$copia->sign($opivote1)) {
+                            $ocambio = $ocambio->summation($opivote);
+                            $icambio = $icambio->summation($ipivote);
+                        } else {
+                            $ocambio = $ocambio->subtraction($opivote);
+                            $icambio = $icambio->subtraction($ipivote);
+                        }
+                    }
+                    $copia->setRow($i, $ocambio);
+                    $inversa->setRow($i, $icambio);
+                }
+            }
+        }
+        for ($j=$copia->getNumCols(); $j>1; $j--) {
+            for ($i=$j-1; $i>=1; $i--) {
+                if ($copia->getPoint($i, $j)!=0) {
+                    $opivote  = $copia->getRow($j);
+                    $ocambio  = $copia->getRow($i);
+                    $ipivote  = $inversa->getRow($j);
+                    $icambio  = $inversa->getRow($i);
+                    $opivote1 = $opivote->getPoint(1, $j);
+                    $ocambio1 = $ocambio->getPoint(1, $j);
+                    if ($ocambio1==$opivote1) {
+                        $ocambio = $ocambio->subtraction($opivote);
+                        $icambio = $icambio->subtraction($ipivote);
+                    } elseif (abs($ocambio1)==abs($opivote1)) {
+                        $ocambio = $ocambio->summation($opivote);
+                        $icambio = $icambio->summation($ipivote);
+                    } else {
+                        $opivote  = $opivote->multiplicationScalar(abs($ocambio1));
+                        $ocambio  = $ocambio->multiplicationScalar(abs($opivote1));
+                        $ipivote  = $ipivote->multiplicationScalar(abs($ocambio1));
+                        $icambio  = $icambio->multiplicationScalar(abs($opivote1));
+                        if ($copia->sign($ocambio1)!=$copia->sign($opivote1)) {
+                            $ocambio = $ocambio->summation($opivote);
+                            $icambio = $icambio->summation($ipivote);
+                        } else {
+                            $ocambio = $ocambio->subtraction($opivote);
+                            $icambio = $icambio->subtraction($ipivote);
+                        }
+                    }
+                    $copia->setRow($i, $ocambio);
+                    $inversa->setRow($i, $icambio);
+                }
+            }
+        }
+        for ($i=1; $i<=$copia->getNumRows(); $i++) {
             $irow = $inversa->getRow($i);
-            $orow = $this->getRow($i);
+            $orow = $copia->getRow($i);
             $irow = $irow->divisionScalar($orow->getPoint(1, $i));
             $orow = $orow->divisionScalar($orow->getPoint(1, $i));
             $inversa->setRow($i, $irow);
-            $this->setRow($i, $orow);
+            $copia->setRow($i, $orow);
         }
         return $inversa;
     }
