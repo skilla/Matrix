@@ -6,9 +6,11 @@
  * Time: 16:00
  */
 
+namespace skilla\matrix\test;
+
 include_once "lib/MatrixBase.php";
 
-class MatrixBaseTest extends PHPUnit_Framework_TestCase
+class MatrixBaseTest extends \PHPUnit_Framework_TestCase
 {
     public function testConstruct()
     {
@@ -286,5 +288,34 @@ class MatrixBaseTest extends PHPUnit_Framework_TestCase
     public function testTrazaOrden4(\skilla\matrix\MatrixBase $matriz)
     {
         $this->assertEquals(14, $matriz->trace());
+    }
+
+    public function testInversa()
+    {
+        $tmp1 = new \skilla\matrix\MatrixBase(3, 3);
+        $tmp1->setPoint(1, 1, 2);
+        $tmp1->setPoint(1, 2, -2);
+        $tmp1->setPoint(1, 3, 2);
+        $tmp1->setPoint(2, 1, 2);
+        $tmp1->setPoint(2, 2, 1);
+        $tmp1->setPoint(2, 3, 0);
+        $tmp1->setPoint(3, 1, 3);
+        $tmp1->setPoint(3, 2, -2);
+        $tmp1->setPoint(3, 3, 2);
+
+        $tmp1 = $tmp1->inversa();
+
+        $tmp2 = new \skilla\matrix\MatrixBase(3, 3);
+        $tmp2->setPoint(1, 1, -1);
+        $tmp2->setPoint(1, 2, 0);
+        $tmp2->setPoint(1, 3, -1);
+        $tmp2->setPoint(2, 1, 2);
+        $tmp2->setPoint(2, 2, 1);
+        $tmp2->setPoint(2, 3, -6);
+        $tmp2->setPoint(3, 1, 7/2);
+        $tmp2->setPoint(3, 2, 1);
+        $tmp2->setPoint(3, 3, -3);
+
+        $this->assertTrue($tmp2->isMatrixEquals($tmp1));
     }
 }

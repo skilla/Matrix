@@ -26,6 +26,9 @@ class MatrixBase
         }
     }
 
+    /**
+     * @return int
+     */
     public function getNumRows()
     {
         if (is_null($this->m)) {
@@ -34,6 +37,9 @@ class MatrixBase
         return $this->m;
     }
 
+    /**
+     * @return int
+     */
     public function getNumCols()
     {
         if (is_null($this->n)) {
@@ -46,26 +52,125 @@ class MatrixBase
         return $this->n;
     }
 
+    /**
+     * @param $row
+     * @param $col
+     * @return int
+     */
+    public function getPoint($row, $col)
+    {
+        return $this->matriz[$row][$col];
+    }
+
+    /**
+     * @param $row
+     * @param $col
+     * @param $value
+     */
+    public function setPoint($row, $col, $value)
+    {
+        $this->matriz[$row][$col] = $value;
+    }
+
+    /**
+     * @param $row
+     * @return MatrixBase
+     */
+    public function getRow($row)
+    {
+        $class = get_class($this);
+        /**
+         * @var MatrixBase $tr
+         */
+        $tr = new $class(1, $this->getNumCols());
+        for ($j=1; $j<=$this->getNumCols(); $j++) {
+            $tr->setPoint(1, $j, $this->getPoint($row, $j));
+        }
+        return $tr;
+    }
+
+    /**
+     * @param $row
+     * @param MatrixBase $base
+     */
+    public function setRow($row, MatrixBase $base)
+    {
+        for ($j=1; $j<=$this->getNumCols(); $j++) {
+            $this->setPoint($row, $j, $base->getPoint(1, $j));
+        }
+    }
+
+    /**
+     * @param $col
+     * @return MatrixBase
+     */
+    public function getCol($col)
+    {
+        $class = get_class($this);
+        /**
+         * @var MatrixBase $tr
+         */
+        $tr = new $class($this->getNumRows(), 1);
+        for ($i=1; $i<=$this->getNumRows(); $i++) {
+            $tr->setPoint($i, 1, $this->getPoint($i, $col));
+        }
+        return $tr;
+    }
+
+    /**
+     * @param $col
+     * @param MatrixBase $base
+     */
+    public function setCol($col, MatrixBase $base)
+    {
+        for ($i=1; $i<=$this->getNumCols(); $i++) {
+            $this->setPoint($i, 1, $base->getPoint($i, $col));
+        }
+    }
+
+    /**
+     * @return array
+     */
+    public function getArray()
+    {
+        return $this->matriz;
+    }
+
+    /**
+     * @return bool
+     */
     public function isNull()
     {
         return $this->getNumRows() == 0;
     }
 
+    /**
+     * @return bool
+     */
     public function isScalar()
     {
         return $this->getNumRows() == 1 && $this->getNumCols() == 1;
     }
 
+    /**
+     * @return bool
+     */
     public function isRowVector()
     {
         return $this->getNumRows() == 1 && $this->getNumCols() > 1;
     }
 
+    /**
+     * @return bool
+     */
     public function isColVector()
     {
         return $this->getNumRows() > 1 && $this->getNumCols() == 1;
     }
 
+    /**
+     * @return bool
+     */
     public function isSquare()
     {
         $isSquare = false;
@@ -77,6 +182,10 @@ class MatrixBase
         return $isSquare;
     }
 
+    /**
+     * @param $functionName
+     * @return int
+     */
     private function privateSumDiagonal($functionName)
     {
         $sum = 0;
@@ -208,16 +317,6 @@ class MatrixBase
         return $isScalar;
     }
 
-    public function getPoint($row, $col)
-    {
-        return $this->matriz[$row][$col];
-    }
-
-    public function setPoint($row, $col, $value)
-    {
-        $this->matriz[$row][$col] = $value;
-    }
-
     public function isMatrixEquals(MatrixBase $base)
     {
         if ($this->getNumRows() != $base->getNumRows()) {
@@ -332,6 +431,10 @@ class MatrixBase
         return $tr;
     }
 
+    /**
+     * @param MatrixBase $base
+     * @return MatrixBase
+     */
     public function subtraction(MatrixBase $base)
     {
         $class = get_class($this);
@@ -347,6 +450,10 @@ class MatrixBase
         return $tr;
     }
 
+    /**
+     * @param $scalar
+     * @return MatrixBase
+     */
     public function multiplicationScalar($scalar)
     {
         $class = get_class($this);
@@ -362,6 +469,29 @@ class MatrixBase
         return $tr;
     }
 
+    /**
+     * @param $scalar
+     * @return MatrixBase
+     */
+    public function divisionScalar($scalar)
+    {
+        $class = get_class($this);
+        /**
+         * @var MatrixBase $tr
+         */
+        $tr = new $class($this->getNumRows(), $this->getNumCols());
+        for ($i = 1; $i <= $this->getNumRows(); $i++) {
+            for ($j = 1; $j <= $this->getNumCols(); $j++) {
+                $tr->setPoint($i, $j, $this->getPoint($i, $j) / $scalar);
+            }
+        }
+        return $tr;
+    }
+
+    /**
+     * @param MatrixBase $base
+     * @return MatrixBase
+     */
     public function multiplicationMatrix(MatrixBase $base)
     {
         $class = get_class($this);
@@ -379,5 +509,104 @@ class MatrixBase
             }
         }
         return $tr;
+    }
+
+    /**
+     * @return MatrixBase
+     */
+    public function inversa()
+    {
+        $class = get_class($this);
+        /**
+         * @var MatrixBase $inversa
+         */
+        $inversa = new $class($this->getNumRows(), $this->getNumCols());
+        for ($i=1; $i<=$this->getNumRows(); $i++) {
+            $inversa->setPoint($i, $i, 1);
+        }
+        for ($j=1; $j<$this->getNumCols(); $j++) {
+            for ($i=$j+1; $i<=$this->getNumRows(); $i++) {
+                if ($this->getPoint($i, $j)!=0) {
+                    $opivote  = $this->getRow($j);
+                    $ocambio  = $this->getRow($i);
+                    $ipivote  = $inversa->getRow($j);
+                    $icambio  = $inversa->getRow($i);
+                    $opivote1 = $opivote->getPoint(1, $j);
+                    $ocambio1 = $ocambio->getPoint(1, $j);
+                    if ($ocambio1==$opivote1) {
+                        $ocambio = $ocambio->subtraction($opivote);
+                        $icambio = $icambio->subtraction($ipivote);
+                    } elseif (abs($ocambio1)==abs($opivote1)) {
+                        $ocambio = $ocambio->summation($opivote);
+                        $icambio = $icambio->summation($ipivote);
+                    } else {
+                        $opivote  = $opivote->multiplicationScalar(abs($ocambio1));
+                        $ocambio  = $ocambio->multiplicationScalar(abs($opivote1));
+                        $ipivote  = $ipivote->multiplicationScalar(abs($ocambio1));
+                        $icambio  = $icambio->multiplicationScalar(abs($opivote1));
+                        if ($this->sign($ocambio1)!=$this->sign($opivote1)) {
+                            $ocambio = $ocambio->summation($opivote);
+                            $icambio = $icambio->summation($ipivote);
+                        } else {
+                            $ocambio = $ocambio->subtraction($opivote);
+                            $icambio = $icambio->subtraction($ipivote);
+                        }
+                    }
+                    $this->setRow($i, $ocambio);
+                    $inversa->setRow($i, $icambio);
+                }
+            }
+        }
+        for ($j=$this->getNumCols(); $j>1; $j--) {
+            for ($i=$j-1; $i>=1; $i--) {
+                if ($this->getPoint($i, $j)!=0) {
+                    $opivote  = $this->getRow($j);
+                    $ocambio  = $this->getRow($i);
+                    $ipivote  = $inversa->getRow($j);
+                    $icambio  = $inversa->getRow($i);
+                    $opivote1 = $opivote->getPoint(1, $j);
+                    $ocambio1 = $ocambio->getPoint(1, $j);
+                    if ($ocambio1==$opivote1) {
+                        $ocambio = $ocambio->subtraction($opivote);
+                        $icambio = $icambio->subtraction($ipivote);
+                    } elseif (abs($ocambio1)==abs($opivote1)) {
+                        $ocambio = $ocambio->summation($opivote);
+                        $icambio = $icambio->summation($ipivote);
+                    } else {
+                        $opivote  = $opivote->multiplicationScalar(abs($ocambio1));
+                        $ocambio  = $ocambio->multiplicationScalar(abs($opivote1));
+                        $ipivote  = $ipivote->multiplicationScalar(abs($ocambio1));
+                        $icambio  = $icambio->multiplicationScalar(abs($opivote1));
+                        if ($this->sign($ocambio1)!=$this->sign($opivote1)) {
+                            $ocambio = $ocambio->summation($opivote);
+                            $icambio = $icambio->summation($ipivote);
+                        } else {
+                            $ocambio = $ocambio->subtraction($opivote);
+                            $icambio = $icambio->subtraction($ipivote);
+                        }
+                    }
+                    $this->setRow($i, $ocambio);
+                    $inversa->setRow($i, $icambio);
+                }
+            }
+        }
+        for ($i=1; $i<=$this->getNumRows(); $i++) {
+            $irow = $inversa->getRow($i);
+            $orow = $this->getRow($i);
+            $irow = $irow->divisionScalar($orow->getPoint(1, $i));
+            $orow = $orow->divisionScalar($orow->getPoint(1, $i));
+            $inversa->setRow($i, $irow);
+            $this->setRow($i, $orow);
+        }
+        return $inversa;
+    }
+
+    /**
+     * @param $number
+     * @return int
+     */
+    private function sign($number)
+    {
+        return ( $number > 0 ) ? 1 : ( ( $number < 0 ) ? -1 : 0 );
     }
 }
