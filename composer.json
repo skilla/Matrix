@@ -1,0 +1,7 @@
+{
+    "name":              "skilla/matrix",
+    "description":       "Librería para el cálculo de operaciones con matrices",
+    "require": {
+        "php":           ">=5.3.0"
+    }
+}
