@@ -1,0 +1,8 @@
+{
+  "name":              "skilla/matrix",
+  "description":       "Gestión de matrices",
+  "require": {
+    "php":           ">=5.3.0",
+    "phpunit/phpunit": "~4.5"
+  }
+}
