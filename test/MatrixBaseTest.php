@@ -1,9 +1,9 @@
 <?php
 /**
  * Created by PhpStorm.
- * User: szambrano
+ * User: sergio zambrano <sergio.zambrano@gmail.com>
  * Date: 24/02/15
- * Time: 16:00
+ * Time: 16:01
  */
 
 namespace skilla\matrix\test;
