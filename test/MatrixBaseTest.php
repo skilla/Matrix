@@ -6,7 +6,7 @@
  * Time: 16:01
  */
 
-namespace skilla\matrix\test;
+namespace Skilla\Matrix\Test;
 
 include_once "lib/MatrixBase.php";
 

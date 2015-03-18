@@ -6,7 +6,7 @@
  * Time: 18:22
  */
 
-namespace skilla\matrix;
+namespace Skilla\Matrix;
 
 class MatrixBase
 {
