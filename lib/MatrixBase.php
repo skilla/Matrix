@@ -13,14 +13,25 @@ class MatrixBase
     private $matriz = array();
     private $m;
     private $n;
+    private $valueZero;
+    private $valueOne;
+    private $precision;
 
-    public function __construct($m = 0, $n = 0)
+    /**
+     * @param int $m
+     * @param int $n
+     * @param int|null $precision
+     */
+    public function __construct($m = 0, $n = 0, $precision = 15)
     {
+        $this->precision = (int)$precision;
+        $this->valueZero = bcadd(0, 0, $this->precision);
+        $this->valueOne = bcadd(0, 1, $this->precision);
         if ($m>0 && $n>0) {
             for ($i = 1; $i <= $m; $i++) {
                 $this->matriz[$i] = array();
                 for ($j = 1; $j <= $n; $j++) {
-                    $this->matriz[$i][$j] = 0.0;
+                    $this->matriz[$i][$j] = $this->valueZero;
                 }
             }
         }
@@ -53,78 +64,89 @@ class MatrixBase
     }
 
     /**
-     * @param $row
-     * @param $col
-     * @return int
+     * @param int $row
+     * @param int $col
+     * @param int|null $precision
+     * @return string
      */
-    public function getPoint($row, $col)
+    public function getPoint($row, $col, $precision = null)
     {
-        return $this->matriz[$row][$col];
+        return is_null($precision) ? $this->matriz[$row][$col] : bcadd($this->matriz[$row][$col], 0, (int)$precision);
     }
 
     /**
-     * @param $row
-     * @param $col
-     * @param $value
+     * @param int $row
+     * @param int $col
+     * @param int|string $value
+     * @param int|null $precision
      */
-    public function setPoint($row, $col, $value)
+    public function setPoint($row, $col, $value, $precision = null)
     {
-        $this->matriz[$row][$col] = $value*1.0;
+        $precision = is_null($precision) ? $this->precision : (int)$precision;
+        $this->matriz[$row][$col] = bcadd($this->valueZero, $value, $precision);
     }
 
     /**
-     * @param $row
+     * @param int $row
+     * @param int|null $precision
      * @return MatrixBase
      */
-    public function getRow($row)
+    public function getRow($row, $precision = null)
     {
+        $precision = is_null($precision) ? $this->precision : (int)$precision;
         $class = get_class($this);
         /**
          * @var MatrixBase $tr
          */
-        $tr = new $class(1, $this->getNumCols());
+        $tr = new $class(1, $this->getNumCols(), $precision);
         for ($j=1; $j<=$this->getNumCols(); $j++) {
-            $tr->setPoint(1, $j, $this->getPoint($row, $j));
+            $tr->setPoint(1, $j, $this->getPoint($row, $j, $precision), $precision);
         }
         return $tr;
     }
 
     /**
-     * @param $row
+     * @param int $row
      * @param MatrixBase $base
+     * @param int|null $precision
      */
-    public function setRow($row, MatrixBase $base)
+    public function setRow($row, MatrixBase $base, $precision = null)
     {
+        $precision = is_null($precision) ? $this->precision : (int)$precision;
         for ($j=1; $j<=$this->getNumCols(); $j++) {
-            $this->setPoint($row, $j, $base->getPoint(1, $j));
+            $this->setPoint($row, $j, $base->getPoint(1, $j, $precision), $precision);
         }
     }
 
     /**
-     * @param $col
+     * @param int $col
+     * @param int|null $precision
      * @return MatrixBase
      */
-    public function getCol($col)
+    public function getCol($col, $precision = null)
     {
+        $precision = is_null($precision) ? $this->precision : (int)$precision;
         $class = get_class($this);
         /**
          * @var MatrixBase $tr
          */
-        $tr = new $class($this->getNumRows(), 1);
+        $tr = new $class($this->getNumRows(), 1, $precision);
         for ($i=1; $i<=$this->getNumRows(); $i++) {
-            $tr->setPoint($i, 1, $this->getPoint($i, $col));
+            $tr->setPoint($i, 1, $this->getPoint($i, $col, $precision), $precision);
         }
         return $tr;
     }
 
     /**
-     * @param $col
+     * @param int $col
      * @param MatrixBase $base
+     * @param int|null $precision
      */
-    public function setCol($col, MatrixBase $base)
+    public function setCol($col, MatrixBase $base, $precision = null)
     {
+        $precision = is_null($precision) ? $this->precision : (int)$precision;
         for ($i=1; $i<=$this->getNumCols(); $i++) {
-            $this->setPoint($i, 1, $base->getPoint($i, $col));
+            $this->setPoint($i, 1, $base->getPoint($i, $col, $precision), $precision);
         }
     }
 
@@ -184,30 +206,37 @@ class MatrixBase
 
     /**
      * @param $functionName
-     * @return int
+     * @return string
      */
     private function privateSumDiagonal($functionName)
     {
-        $sum = 0;
+        $sum = $this->valueZero;
         for ($i = 1; $i <= $this->getNumRows(); $i++) {
-            $sum += (int)call_user_func(array($this, $functionName), $this->getPoint($i, $i));
+            $sum = bcadd(
+                $sum,
+                call_user_func(
+                    array($this, $functionName),
+                    $this->getPoint($i, $i, $this->precision)
+                ),
+                $this->precision
+            );
         }
         return $sum;
     }
 
     private function equalZero($a)
     {
-        return $a == 0;
+        return bccomp($a, $this->valueZero, $this->precision) == 0;
     }
 
     private function equalUnit($a)
     {
-        return $a == 1;
+        return bccomp($a, $this->valueOne, $this->precision) == 0;
     }
 
     private function greaterZero($a)
     {
-        return $a >= 1;
+        return bccomp($a, $this->valueZero, $this->precision) >= 0;
     }
 
     private function privateIsDiagonalZero()
@@ -233,7 +262,7 @@ class MatrixBase
         $isZero = true;
         for ($i = 1; $i <= $this->getNumRows() && $isZero; $i++) {
             for ($j = $i + 1; $j <= $this->getNumCols() && $isZero; $j++) {
-                if ($this->getPoint($i, $j) != 0) {
+                if (bccomp($this->valueZero, $this->getPoint($i, $j, $this->precision), $this->precision) != 0) {
                     $isZero = false;
                 }
             }
@@ -246,7 +275,7 @@ class MatrixBase
         $isZero = true;
         for ($i = 2; $i <= $this->getNumRows() && $isZero; $i++) {
             for ($j = 1; $j < $i && $isZero; $j++) {
-                if ($this->getPoint($i, $j) != 0) {
+                if (bccomp($this->valueZero, $this->getPoint($i, $j, $this->precision), $this->precision) != 0) {
                     $isZero = false;
                 }
             }
@@ -305,11 +334,14 @@ class MatrixBase
 
         if ($isScalar) {
             $origin = $this->getPoint(1, 1);
-            if ($origin == 0 || $origin == 1) {
+            if (
+                bccomp($this->valueZero, $origin, $this->precision)==0 ||
+                bccomp($this->valueOne, $origin, $this->precision)==1
+            ) {
                 $isScalar = false;
             }
             for ($i = 2; $i <= $this->getNumRows() && $isScalar; $i++) {
-                if ($this->getPoint($i - 1, $i - 1) != $origin) {
+                if (bccomp($this->getPoint($i - 1, $i - 1), $origin, $this->precision)==0) {
                     $isScalar = false;
                 }
             }
@@ -317,8 +349,14 @@ class MatrixBase
         return $isScalar;
     }
 
-    public function isMatrixEquals(MatrixBase $base)
+    /**
+     * @param MatrixBase $base
+     * @param int|null $precision
+     * @return bool
+     */
+    public function isMatrixEquals(MatrixBase $base, $precision = null)
     {
+        $precision = is_null($precision) ? $this->precision : (int)$precision;
         if ($this->getNumRows() != $base->getNumRows()) {
             return false;
         }
@@ -328,22 +366,31 @@ class MatrixBase
         $equals = true;
         for ($i = 1; $i <= $this->getNumRows() && $equals; $i++) {
             for ($j = 1; $j <= $this->getNumCols() && $equals; $j++) {
-                $equals = $this->getPoint($i, $j) == $base->getPoint($i, $j);
+                $equals = bccomp(
+                    $this->getPoint($i, $j, $precision),
+                    $base->getPoint($i, $j, $precision),
+                    $this->precision
+                ) == 0;
             }
         }
         return $equals;
     }
 
-    public function transposed()
+    /**
+     * @param int|null $precision
+     * @return MatrixBase
+     */
+    public function transposed($precision = null)
     {
+        $precision = is_null($precision) ? $this->precision : (int)$precision;
         $class = get_class($this);
         /**
          * @var MatrixBase $tr
          */
-        $tr = new $class($this->getNumCols(), $this->getNumRows());
+        $tr = new $class($this->getNumCols(), $this->getNumRows(), $precision);
         for ($i = 1; $i <= $this->getNumRows(); $i++) {
             for ($j = 1; $j <= $this->getNumCols(); $j++) {
-                $tr->setPoint($j, $i, $this->getPoint($i, $j));
+                $tr->setPoint($j, $i, $this->getPoint($i, $j, $precision), $precision);
             }
         }
         return $tr;
@@ -355,13 +402,20 @@ class MatrixBase
         return $this->isMatrixEquals($tr);
     }
 
-    public function getAdjunto($i, $j)
+    /**
+     * @param $i
+     * @param $j
+     * @param int|null $precision
+     * @return MatrixBase
+     */
+    public function getAdjunto($i, $j, $precision = null)
     {
+        $precision = is_null($precision) ? $this->precision : (int)$precision;
         $class = get_class($this);
         /**
          * @var MatrixBase $tr
          */
-        $tr = new $class($this->getNumRows() - 1, $this->getNumCols() - 1);
+        $tr = new $class($this->getNumRows() - 1, $this->getNumCols() - 1, $precision);
         for ($m=1; $m<=$this->getNumRows(); $m++) {
             for ($n=1; $n<=$this->getNumCols(); $n++) {
                 if ($m==$i || $n==$j) {
@@ -369,63 +423,168 @@ class MatrixBase
                 }
                 $row = ($m<$i) ? $m : $m-1;
                 $col = ($n<$j) ? $n : $n-1;
-                $tr->setPoint($row, $col, $this->getPoint($m, $n));
+                $tr->setPoint($row, $col, $this->getPoint($m, $n, $precision), $precision);
             }
         }
         return $tr;
     }
 
-    public function determinant()
+    public function determinant($precision = null)
     {
-        $determinante = 0;
+        $precision = is_null($precision) ? $this->precision : (int)$precision;
+        $determinante = $this->valueZero;
         if ($this->isSquare()) {
             if ($this->getNumRows()==1) {
-                $determinante = $this->getPoint(1, 1);
+                $determinante = $this->getPoint(1, 1, $precision);
             }
             if ($this->getNumRows()==2) {
-                $determinante =
-                    ($this->getPoint(1, 1) * $this->getPoint(2, 2)) -
-                    ($this->getPoint(1, 2) * $this->getPoint(2, 1));
+                $determinante = bcsub(
+                    bcmul(
+                        $this->getPoint(1, 1, $precision),
+                        $this->getPoint(2, 2, $precision),
+                        $precision
+                    ),
+                    bcmul(
+                        $this->getPoint(1, 2, $precision),
+                        $this->getPoint(2, 1, $precision),
+                        $precision
+                    ),
+                    $precision
+                );
             }
             if ($this->getNumRows()==3) {
-                $determinante =
-                    ($this->getPoint(1, 1) * $this->getPoint(2, 2) * $this->getPoint(3, 3)) +
-                    ($this->getPoint(1, 2) * $this->getPoint(2, 3) * $this->getPoint(3, 1)) +
-                    ($this->getPoint(1, 3) * $this->getPoint(2, 1) * $this->getPoint(3, 2)) -
-                    ($this->getPoint(1, 3) * $this->getPoint(2, 2) * $this->getPoint(3, 1)) -
-                    ($this->getPoint(1, 2) * $this->getPoint(2, 1) * $this->getPoint(3, 3)) -
-                    ($this->getPoint(1, 1) * $this->getPoint(2, 3) * $this->getPoint(3, 2));
+                $determinante = bcadd(0, 0, $precision);
+                $punto1 = bcmul(
+                    $this->getPoint(1, 1, $precision),
+                    $this->getPoint(2, 2, $precision),
+                    $precision
+                );
+                $punto1 = bcmul(
+                    $punto1,
+                    $this->getPoint(3, 3, $precision),
+                    $precision
+                );
+                $determinante = bcadd($determinante, $punto1, $determinante);
+                $punto1 = bcmul(
+                    $this->getPoint(1, 2, $precision),
+                    $this->getPoint(2, 3, $precision),
+                    $precision
+                );
+                $punto1 = bcmul(
+                    $punto1,
+                    $this->getPoint(3, 1, $precision),
+                    $precision
+                );
+                $determinante = bcadd($determinante, $punto1, $determinante);
+                $punto1 = bcmul(
+                    $this->getPoint(1, 3, $precision),
+                    $this->getPoint(2, 1, $precision),
+                    $precision
+                );
+                $punto1 = bcmul(
+                    $punto1,
+                    $this->getPoint(3, 2, $precision),
+                    $precision
+                );
+                $determinante = bcadd($determinante, $punto1, $determinante);
+                $punto1 = bcmul(
+                    $this->getPoint(3, 1, $precision),
+                    $this->getPoint(2, 2, $precision),
+                    $precision
+                );
+                $punto1 = bcmul(
+                    $punto1,
+                    $this->getPoint(1, 3, $precision),
+                    $precision
+                );
+                $determinante = bcsub($determinante, $punto1, $determinante);
+                $punto1 = bcmul(
+                    $this->getPoint(3, 2, $precision),
+                    $this->getPoint(2, 3, $precision),
+                    $precision
+                );
+                $punto1 = bcmul(
+                    $punto1,
+                    $this->getPoint(1, 1, $precision),
+                    $precision
+                );
+                $determinante = bcsub($determinante, $punto1, $determinante);
+                $punto1 = bcmul(
+                    $this->getPoint(3, 3, $precision),
+                    $this->getPoint(2, 1, $precision),
+                    $precision
+                );
+                $punto1 = bcmul(
+                    $punto1,
+                    $this->getPoint(1, 2, $precision),
+                    $precision
+                );
+                $determinante = bcsub($determinante, $punto1, $determinante);
             }
             if ($this->getNumRows()>3) {
-                $determinante = 0;
+                $determinante = $this->valueZero;
                 for ($j=1; $j<=$this->getNumCols(); $j++) {
-                    $determinante += $this->getPoint(1, $j) * pow(-1, 1+$j) * $this->getAdjunto(1, $j)->determinant();
+                    $determinante = bcadd(
+                        $determinante,
+                        bcmul(
+                            bcmul(
+                                $this->getPoint(1, $j, $precision),
+                                pow(-1, 1+$j),
+                                $precision
+                            ),
+                            $this->getAdjunto(1, $j)->determinant(),
+                            $precision
+                        ),
+                        $precision
+                    );
                 }
-                return $determinante;
             }
         }
         return $determinante;
     }
 
-    public function trace()
+    /**
+     * @param int|null $precision
+     * @return string
+     */
+    public function trace($precision = null)
     {
-        $trace = 0;
+        $precision = is_null($precision) ? $this->precision : (int)$precision;
+        $trace = bcadd(0, 0, $precision);
         for ($i=1; $i<=$this->getNumRows(); $i++) {
-            $trace += $this->getPoint($i, $i);
+            $trace = bcadd(
+                $trace,
+                $this->getPoint($i, $i, $precision),
+                $precision
+            );
         }
         return $trace;
     }
 
-    public function summation(MatrixBase $base)
+    /**
+     * @param MatrixBase $base
+     * @param int|null $precision
+     * @return MatrixBase
+     */
+    public function summation(MatrixBase $base, $precision = null)
     {
+        $precision = is_null($precision) ? $this->precision : (int)$precision;
         $class = get_class($this);
         /**
          * @var MatrixBase $tr
          */
-        $tr = new $class($this->getNumRows(), $this->getNumCols());
+        $tr = new $class($this->getNumRows(), $this->getNumCols(), $precision);
         for ($i = 1; $i <= $this->getNumRows(); $i++) {
             for ($j = 1; $j <= $this->getNumCols(); $j++) {
-                $tr->setPoint($i, $j, $this->getPoint($i, $j) + $base->getPoint($i, $j));
+                $tr->setPoint(
+                    $i,
+                    $j,
+                    bcadd(
+                        $this->getPoint($i, $j, $precision),
+                        $base->getPoint($i, $j, $precision),
+                        $precision
+                    )
+                );
             }
         }
         return $tr;
@@ -433,18 +592,28 @@ class MatrixBase
 
     /**
      * @param MatrixBase $base
+     * @param int|null $precision
      * @return MatrixBase
      */
-    public function subtraction(MatrixBase $base)
+    public function subtraction(MatrixBase $base, $precision = null)
     {
+        $precision = is_null($precision) ? $this->precision : (int)$precision;
         $class = get_class($this);
         /**
          * @var MatrixBase $tr
          */
-        $tr = new $class($this->getNumRows(), $this->getNumCols());
+        $tr = new $class($this->getNumRows(), $this->getNumCols(), $precision);
         for ($i = 1; $i <= $this->getNumRows(); $i++) {
             for ($j = 1; $j <= $this->getNumCols(); $j++) {
-                $tr->setPoint($i, $j, $this->getPoint($i, $j) - $base->getPoint($i, $j));
+                $tr->setPoint(
+                    $i,
+                    $j,
+                    bcsub(
+                        $this->getPoint($i, $j, $precision),
+                        $base->getPoint($i, $j, $precision),
+                        $precision
+                    )
+                );
             }
         }
         return $tr;
@@ -452,18 +621,28 @@ class MatrixBase
 
     /**
      * @param $scalar
+     * @param int|null $precision
      * @return MatrixBase
      */
-    public function multiplicationScalar($scalar)
+    public function multiplicationScalar($scalar, $precision = null)
     {
+        $precision = is_null($precision) ? $this->precision : (int)$precision;
         $class = get_class($this);
         /**
          * @var MatrixBase $tr
          */
-        $tr = new $class($this->getNumRows(), $this->getNumCols());
+        $tr = new $class($this->getNumRows(), $this->getNumCols(), $precision);
         for ($i = 1; $i <= $this->getNumRows(); $i++) {
             for ($j = 1; $j <= $this->getNumCols(); $j++) {
-                $tr->setPoint($i, $j, $this->getPoint($i, $j) * $scalar);
+                $tr->setPoint(
+                    $i,
+                    $j,
+                    bcmul(
+                        $this->getPoint($i, $j, $precision),
+                        $scalar,
+                        $precision
+                    )
+                );
             }
         }
         return $tr;
@@ -471,18 +650,28 @@ class MatrixBase
 
     /**
      * @param $scalar
+     * @param int|null $precision
      * @return MatrixBase
      */
-    public function divisionScalar($scalar)
+    public function divisionScalar($scalar, $precision = null)
     {
+        $precision = is_null($precision) ? $this->precision : (int)$precision;
         $class = get_class($this);
         /**
          * @var MatrixBase $tr
          */
-        $tr = new $class($this->getNumRows(), $this->getNumCols());
+        $tr = new $class($this->getNumRows(), $this->getNumCols(), $precision);
         for ($i = 1; $i <= $this->getNumRows(); $i++) {
             for ($j = 1; $j <= $this->getNumCols(); $j++) {
-                $tr->setPoint($i, $j, $this->getPoint($i, $j) / $scalar);
+                $tr->setPoint(
+                    $i,
+                    $j,
+                    bcdiv(
+                        $this->getPoint($i, $j, $precision),
+                        $scalar,
+                        $precision
+                    )
+                );
             }
         }
         return $tr;
@@ -490,22 +679,32 @@ class MatrixBase
 
     /**
      * @param MatrixBase $base
+     * @param int|null $precision
      * @return MatrixBase
      */
-    public function multiplicationMatrix(MatrixBase $base)
+    public function multiplicationMatrix(MatrixBase $base, $precision = null)
     {
+        $precision = is_null($precision) ? $this->precision : (int)$precision;
         $class = get_class($this);
         /**
          * @var MatrixBase $tr
          */
-        $tr = new $class($this->getNumRows(), $base->getNumCols());
+        $tr = new $class($this->getNumRows(), $base->getNumCols(), $precision);
         for ($i = 1; $i <= $tr->getNumRows(); $i++) {
             for ($j = 1; $j <= $tr->getNumCols(); $j++) {
-                $suma = 0;
+                $suma = bcadd(0, 0, $precision);
                 for ($c=1; $c<=$tr->getNumCols(); $c++) {
-                    $suma += $this->getPoint($i, $c) * $base->getPoint($c, $j);
+                    $suma = bcadd(
+                        $suma,
+                        bcmul(
+                            $this->getPoint($i, $c, $precision),
+                            $base->getPoint($c, $j, $precision),
+                            $precision
+                        ),
+                        $precision
+                    );
                 }
-                $tr->setPoint($i, $j, $suma);
+                $tr->setPoint($i, $j, $suma, $precision);
             }
         }
         return $tr;
@@ -514,109 +713,155 @@ class MatrixBase
     /**
      * @return MatrixBase
      */
-    public function inversa()
+    public function inversa($precision = null)
     {
+        $precision = is_null($precision) ? $this->precision : (int)$precision;
         $class = get_class($this);
         /**
          * @var MatrixBase $inversa
          */
-        $inversa = new $class($this->getNumRows(), $this->getNumCols());
+        $inversa = new $class($this->getNumRows(), $this->getNumCols(), $precision);
         for ($i=1; $i<=$this->getNumRows(); $i++) {
-            $inversa->setPoint($i, $i, 1);
+            $inversa->setPoint($i, $i, 1, $precision);
         }
-        $class = get_class($this);
         /**
-         * @var MatrixBase $inversa
+         * @var MatrixBase $copia
          */
-        $copia = new $class($this->getNumRows(), $this->getNumCols());
+        $copia = new $class($this->getNumRows(), $this->getNumCols(), $precision);
         for ($i=1; $i<=$this->getNumRows(); $i++) {
             for ($j=1; $j<=$this->getNumRows(); $j++) {
-                $copia->setPoint($i, $j, $this->getPoint($i, $j));
+                $copia->setPoint($i, $j, $this->getPoint($i, $j, $precision), $precision);
             }
         }
         for ($j=1; $j<$copia->getNumCols(); $j++) {
             for ($i=$j+1; $i<=$copia->getNumRows(); $i++) {
                 if ($copia->getPoint($i, $j)!=0) {
-                    $opivote  = $copia->getRow($j);
-                    $ocambio  = $copia->getRow($i);
-                    $ipivote  = $inversa->getRow($j);
-                    $icambio  = $inversa->getRow($i);
-                    $opivote1 = $opivote->getPoint(1, $j);
-                    $ocambio1 = $ocambio->getPoint(1, $j);
+                    $opivote  = $copia->getRow($j, $precision);
+                    $ocambio  = $copia->getRow($i, $precision);
+                    $ipivote  = $inversa->getRow($j, $precision);
+                    $icambio  = $inversa->getRow($i, $precision);
+                    $opivote1 = $opivote->getPoint(1, $j, $precision);
+                    $ocambio1 = $ocambio->getPoint(1, $j, $precision);
                     if ($ocambio1==$opivote1) {
-                        $ocambio = $ocambio->subtraction($opivote);
-                        $icambio = $icambio->subtraction($ipivote);
+                        $ocambio = $ocambio->subtraction($opivote, $precision);
+                        $icambio = $icambio->subtraction($ipivote, $precision);
                     } elseif (abs($ocambio1)==abs($opivote1)) {
-                        $ocambio = $ocambio->summation($opivote);
-                        $icambio = $icambio->summation($ipivote);
+                        $ocambio = $ocambio->summation($opivote, $precision);
+                        $icambio = $icambio->summation($ipivote, $precision);
                     } else {
-                        $opivote  = $opivote->multiplicationScalar(abs($ocambio1));
-                        $ocambio  = $ocambio->multiplicationScalar(abs($opivote1));
-                        $ipivote  = $ipivote->multiplicationScalar(abs($ocambio1));
-                        $icambio  = $icambio->multiplicationScalar(abs($opivote1));
-                        if ($copia->sign($ocambio1)!=$copia->sign($opivote1)) {
-                            $ocambio = $ocambio->summation($opivote);
-                            $icambio = $icambio->summation($ipivote);
+                        $opivote  = $opivote->multiplicationScalar($this->bcabs($ocambio1), $precision);
+                        $ocambio  = $ocambio->multiplicationScalar($this->bcabs($opivote1), $precision);
+                        $ipivote  = $ipivote->multiplicationScalar($this->bcabs($ocambio1), $precision);
+                        $icambio  = $icambio->multiplicationScalar($this->bcabs($opivote1), $precision);
+                        if ($copia->bcsign($ocambio1)!=$copia->bcsign($opivote1)) {
+                            $ocambio = $ocambio->summation($opivote, $precision);
+                            $icambio = $icambio->summation($ipivote, $precision);
                         } else {
-                            $ocambio = $ocambio->subtraction($opivote);
-                            $icambio = $icambio->subtraction($ipivote);
+                            $ocambio = $ocambio->subtraction($opivote, $precision);
+                            $icambio = $icambio->subtraction($ipivote, $precision);
                         }
                     }
-                    $copia->setRow($i, $ocambio);
-                    $inversa->setRow($i, $icambio);
+                    $copia->setRow($i, $ocambio, $precision);
+                    $inversa->setRow($i, $icambio, $precision);
                 }
             }
         }
         for ($j=$copia->getNumCols(); $j>1; $j--) {
             for ($i=$j-1; $i>=1; $i--) {
-                if ($copia->getPoint($i, $j)!=0) {
-                    $opivote  = $copia->getRow($j);
-                    $ocambio  = $copia->getRow($i);
-                    $ipivote  = $inversa->getRow($j);
-                    $icambio  = $inversa->getRow($i);
-                    $opivote1 = $opivote->getPoint(1, $j);
-                    $ocambio1 = $ocambio->getPoint(1, $j);
-                    if ($ocambio1==$opivote1) {
-                        $ocambio = $ocambio->subtraction($opivote);
-                        $icambio = $icambio->subtraction($ipivote);
-                    } elseif (abs($ocambio1)==abs($opivote1)) {
-                        $ocambio = $ocambio->summation($opivote);
-                        $icambio = $icambio->summation($ipivote);
+                if (bccomp($copia->getPoint($i, $j, $precision), bcadd(0, 0, $precision), $precision)!=0) {
+                    $opivote  = $copia->getRow($j, $precision);
+                    $ocambio  = $copia->getRow($i, $precision);
+                    $ipivote  = $inversa->getRow($j, $precision);
+                    $icambio  = $inversa->getRow($i, $precision);
+                    $opivote1 = $opivote->getPoint(1, $j, $precision);
+                    $ocambio1 = $ocambio->getPoint(1, $j, $precision);
+                    if (bccomp($ocambio1, $opivote1, $precision)==0) {
+                        $ocambio = $ocambio->subtraction($opivote, $precision);
+                        $icambio = $icambio->subtraction($ipivote, $precision);
+                    } elseif (bccomp($this->bcabs($ocambio1), $this->bcabs($opivote1))==0) {
+                        $ocambio = $ocambio->summation($opivote, $precision);
+                        $icambio = $icambio->summation($ipivote, $precision);
                     } else {
-                        $opivote  = $opivote->multiplicationScalar(abs($ocambio1));
-                        $ocambio  = $ocambio->multiplicationScalar(abs($opivote1));
-                        $ipivote  = $ipivote->multiplicationScalar(abs($ocambio1));
-                        $icambio  = $icambio->multiplicationScalar(abs($opivote1));
-                        if ($copia->sign($ocambio1)!=$copia->sign($opivote1)) {
-                            $ocambio = $ocambio->summation($opivote);
-                            $icambio = $icambio->summation($ipivote);
+                        $opivote  = $opivote->multiplicationScalar($this->bcabs($ocambio1), $precision);
+                        $ocambio  = $ocambio->multiplicationScalar($this->bcabs($opivote1), $precision);
+                        $ipivote  = $ipivote->multiplicationScalar($this->bcabs($ocambio1), $precision);
+                        $icambio  = $icambio->multiplicationScalar($this->bcabs($opivote1), $precision);
+                        if ($copia->bcsign($ocambio1)!=$copia->bcsign($opivote1)) {
+                            $ocambio = $ocambio->summation($opivote, $precision);
+                            $icambio = $icambio->summation($ipivote, $precision);
                         } else {
-                            $ocambio = $ocambio->subtraction($opivote);
-                            $icambio = $icambio->subtraction($ipivote);
+                            $ocambio = $ocambio->subtraction($opivote, $precision);
+                            $icambio = $icambio->subtraction($ipivote, $precision);
                         }
                     }
-                    $copia->setRow($i, $ocambio);
-                    $inversa->setRow($i, $icambio);
+                    $copia->setRow($i, $ocambio, $precision);
+                    $inversa->setRow($i, $icambio, $precision);
                 }
             }
         }
         for ($i=1; $i<=$copia->getNumRows(); $i++) {
             $irow = $inversa->getRow($i);
             $orow = $copia->getRow($i);
-            $irow = $irow->divisionScalar($orow->getPoint(1, $i));
-            $orow = $orow->divisionScalar($orow->getPoint(1, $i));
-            $inversa->setRow($i, $irow);
-            $copia->setRow($i, $orow);
+            $irow = $irow->divisionScalar($orow->getPoint(1, $i, $precision), $precision);
+            $orow = $orow->divisionScalar($orow->getPoint(1, $i, $precision), $precision);
+            $inversa->setRow($i, $irow, $precision);
+            $copia->setRow($i, $orow, $precision);
         }
         return $inversa;
     }
 
     /**
-     * @param $number
+     * @param string $number
      * @return int
      */
-    private function sign($number)
+    private function bcsign($number)
     {
-        return ( $number > 0 ) ? 1 : ( ( $number < 0 ) ? -1 : 0 );
+        return bccomp($number, $this->valueZero, $this->precision);
+    }
+
+    /**
+     * @param string $number
+     * @return string
+     */
+    private function bcabs($number)
+    {
+        return bcmul($number, $this->bcsign($number), $this->precision);
+    }
+
+    /**
+     * @param int|null $precision
+     * @return string
+     */
+    public function bcpi($precision = null)
+    {
+        $precision = is_null($precision) ? $this->precision : (int)$precision;
+        $limit = ceil(log($precision)/log(2))-1;
+        $precision = $precision+6;
+        $a = 1;
+        $b = bcdiv(1, bcsqrt(2, $precision), $precision);
+        $t = 1/4;
+        $p = 1;
+        $n = 0;
+        while ($n < $limit) {
+            $x = bcdiv(bcadd($a, $b, $precision), 2, $precision);
+            $y = bcsqrt(bcmul($a, $b, $precision), $precision);
+            $t = bcsub($t, bcmul($p, bcpow(bcsub($a, $x, $precision), 2, $precision), $precision), $precision);
+            $a = $x;
+            $b = $y;
+            $p = bcmul(2, $p, $precision);
+            ++$n;
+        }
+        return bcdiv(bcpow(bcadd($a, $b, $precision), 2, $precision), bcmul(4, $t, $precision), $precision);
+    }
+
+    public function pretty($precision = null)
+    {
+        $precision = is_null($precision) ? $this->precision : (int)$precision;
+        for ($j=1; $j<=$this->getNumCols(); $j++) {
+            for ($i = 1; $i <= $this->getNumRows(); $i++) {
+                echo str_pad($this->getPoint($i, $j), $precision+10, ' ', STR_PAD_LEFT)."  ";
+            }
+            echo "\n";
+        }
     }
 }
