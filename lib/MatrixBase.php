@@ -681,11 +681,20 @@ class MatrixBase
      * @param MatrixBase $base
      * @param int|null $precision
      * @return MatrixBase
+     * @throws \Exception
      */
     public function multiplicationMatrix(MatrixBase $base, $precision = null)
     {
         $precision = is_null($precision) ? $this->precision : (int)$precision;
         $class = get_class($this);
+
+        if ($this->getNumCols()!=$base->getNumRows()) {
+            throw new \Exception(
+                "El número de columnas de esta matriz de ser igual al número de filas de la matriz parámetro".
+                "Yo ".$this->getNumRows()."x".$this->getNumCols().
+                " parámertro ".$base->getNumRows()."x".$base->getNumCols()
+            );
+        }
         /**
          * @var MatrixBase $tr
          */
@@ -693,12 +702,12 @@ class MatrixBase
         for ($i = 1; $i <= $tr->getNumRows(); $i++) {
             for ($j = 1; $j <= $tr->getNumCols(); $j++) {
                 $suma = bcadd(0, 0, $precision);
-                for ($c=1; $c<=$tr->getNumCols(); $c++) {
+                for ($k=1; $k<=$this->getNumCols(); $k++) {
                     $suma = bcadd(
                         $suma,
                         bcmul(
-                            $this->getPoint($i, $c, $precision),
-                            $base->getPoint($c, $j, $precision),
+                            $this->getPoint($i, $k, $precision),
+                            $base->getPoint($k, $j, $precision),
                             $precision
                         ),
                         $precision
@@ -749,9 +758,21 @@ class MatrixBase
                         $ocambio = $ocambio->summation($opivote, $precision);
                         $icambio = $icambio->summation($ipivote, $precision);
                     } else {
+                        /**
+                         * @var MatrixBase $opivote
+                         */
                         $opivote  = $opivote->multiplicationScalar($this->bcabs($ocambio1), $precision);
+                        /**
+                         * @var MatrixBase $ocambio
+                         */
                         $ocambio  = $ocambio->multiplicationScalar($this->bcabs($opivote1), $precision);
+                        /**
+                         * @var MatrixBase $ipivote
+                         */
                         $ipivote  = $ipivote->multiplicationScalar($this->bcabs($ocambio1), $precision);
+                        /**
+                         * @var MatrixBase $icambio
+                         */
                         $icambio  = $icambio->multiplicationScalar($this->bcabs($opivote1), $precision);
                         if ($copia->bcsign($ocambio1)!=$copia->bcsign($opivote1)) {
                             $ocambio = $ocambio->summation($opivote, $precision);

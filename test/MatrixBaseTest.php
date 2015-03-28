@@ -346,7 +346,12 @@ class MatrixBaseTest extends \PHPUnit_Framework_TestCase
         return $matriz;
     }
 
-    public function testMultiplica()
+    /**
+     * @param MatrixBase $matriz
+     * @return MatrixBase
+     * @depends testAdjuntoOrden4
+     */
+    public function testMultiplica1(MatrixBase $matriz)
     {
         $tmp1 = new MatrixBase(3, 3, 5);
         $tmp1->setPoint(1, 1, 2);
@@ -383,10 +388,143 @@ class MatrixBaseTest extends \PHPUnit_Framework_TestCase
 
         $tmp4 = $tmp1->multiplicationMatrix($tmp2);
         $this->assertTrue($tmp3->isMatrixEquals($tmp4));
+        return $tmp4;
     }
 
     /**
-     * @depends testMultiplica
+     * @return MatrixBase
+     */
+    public function matrizX()
+    {
+        $x = new MatrixBase(3, 8, 10);
+        $x->setPoint(1, 1, 1);
+        $x->setPoint(1, 2, 1);
+        $x->setPoint(1, 3, 1);
+        $x->setPoint(1, 4, 1);
+        $x->setPoint(1, 5, 1);
+        $x->setPoint(1, 6, 1);
+        $x->setPoint(1, 7, 1);
+        $x->setPoint(1, 8, 1);
+        $x->setPoint(2, 1, 38);
+        $x->setPoint(2, 2, 41);
+        $x->setPoint(2, 3, 34);
+        $x->setPoint(2, 4, 35);
+        $x->setPoint(2, 5, 31);
+        $x->setPoint(2, 6, 34);
+        $x->setPoint(2, 7, 29);
+        $x->setPoint(2, 8, 32);
+        $x->setPoint(3, 1, 47.5);
+        $x->setPoint(3, 2, 21.3);
+        $x->setPoint(3, 3, 36.5);
+        $x->setPoint(3, 4, 18.0);
+        $x->setPoint(3, 5, 29.5);
+        $x->setPoint(3, 6, 14.2);
+        $x->setPoint(3, 7, 21.0);
+        $x->setPoint(3, 8, 10.0);
+        return $x;
+    }
+
+    /**
+     * @return MatrixBase
+     */
+    public function matrixXPorTranspuestaX()
+    {
+        $xx = new MatrixBase(3, 3, 10);
+        $xx->setPoint(1, 1, 8);
+        $xx->setPoint(1, 2, 274);
+        $xx->setPoint(1, 3, 198);
+        $xx->setPoint(2, 1, 274);
+        $xx->setPoint(2, 2, 9488);
+        $xx->setPoint(2, 3, 6875.6);
+        $xx->setPoint(3, 1, 198);
+        $xx->setPoint(3, 2, 6875.6);
+        $xx->setPoint(3, 3, 5979.08);
+        return $xx;
+    }
+
+    /**
+     * @return MatrixBase
+     * @depends testMultiplica1
+     */
+    public function testMultiplica2()
+    {
+        $tmp1 = $this
+            ->matrizX()
+            ->multiplicationMatrix(
+                $this->matrizX()->transposed()
+            );
+        $tmp2 = $this
+            ->matrixXPorTranspuestaX();
+        $this->assertTrue(
+            $tmp1
+                ->isMatrixEquals(
+                    $tmp2
+                )
+        );
+
+        return $tmp2;
+    }
+
+    /**
+     * @return MatrixBase
+     */
+    public function matrizY()
+    {
+        $y = new MatrixBase(1, 8, 10);
+        $y->setPoint(1, 1, 66.0);
+        $y->setpoint(1, 2, 43.0);
+        $y->setPoint(1, 3, 36.0);
+        $y->setPoint(1, 4, 23.0);
+        $y->setPoint(1, 5, 22.0);
+        $y->setPoint(1, 6, 14.0);
+        $y->setPoint(1, 7, 12.0);
+        $y->setPoint(1, 8, 7.60);
+        return $y;
+    }
+
+    /**
+     * @return MatrixBase
+     */
+    public function matrizYPorTranspuestaX()
+    {
+        $xy = new MatrixBase(1, 3, 10);
+        $xy->setPoint(1, 1, 223.6);
+        $xy->setPoint(1, 2, 8049.2);
+        $xy->setPoint(1, 3, 6954.7);
+        return $xy;
+    }
+
+    /**
+     * @depends testMultiplica2
+     */
+    public function testMultiplica3()
+    {
+        $x  = $this->matrizX();
+        $y  = $this->matrizY();
+        $xy = $y->multiplicationMatrix($x->transposed());
+
+        $this->assertTrue($xy->isMatrixEquals($this->matrizYPorTranspuestaX()));
+    }
+
+    /**
+     * @depends testMultiplica3
+     */
+    public function testMultiplica4()
+    {
+        $xx = $this->matrixXPorTranspuestaX();
+        $xy = $this->matrizYPorTranspuestaX();
+        $b  = $xy->multiplicationMatrix($xx->inversa());
+
+        $result = new MatrixBase(1, 3, 10);
+        $result->setPoint(1, 1, "-94.5520287413");
+        $result->setPoint(1, 2, "2.8015512675");
+        $result->setPoint(1, 3, "1.0726821701");
+
+        $this->assertTrue($b->isMatrixEquals($result));
+    }
+
+    /**
+     * @depends testMultiplica4
      */
     public function testInversa()
     {
