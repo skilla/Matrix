@@ -32,3 +32,10 @@
 
 # Composer PHAR
 /composer.phar
+.idea
+.sonar
+sonar*
+build
+composer.lock
+coverage
+scan.sh
