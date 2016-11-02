@@ -11,5 +11,5 @@ php:
 install:
     - composer install
 
-script: phpunit -c Tests/phpunit.xml
+script: bin/phpunit -c Tests/phpunit.xml
 
