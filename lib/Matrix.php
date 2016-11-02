@@ -74,7 +74,7 @@ class Matrix
         if ($this->getNumRows()<(int)$row || $this->getNumCols()<(int)$col) {
             throw new OutOfRangeException(
                 sprintf(
-                    'Maximun row %s, maximun column %s actual parameters (%s, %s)',
+                    'Maximum row %s, maximum column %s actual parameters (%s, %s)',
                     $this->getNumRows(),
                     $this->getNumCols(),
                     $row,
@@ -99,7 +99,7 @@ class Matrix
         if ($this->getNumRows()<(int)$row || $this->getNumCols()<(int)$col) {
             throw new OutOfRangeException(
                 sprintf(
-                    'Maximun row %s, maximun column %s actual parameters (%s, %s)',
+                    'Maximum row %s, maximum column %s actual parameters (%s, %s)',
                     $this->getNumRows(),
                     $this->getNumCols(),
                     $row,
@@ -121,7 +121,7 @@ class Matrix
     public function getRow($row, $precision = null)
     {
         if ($this->getNumRows()<(int)$row) {
-            throw new OutOfRangeException(sprintf('Maximun row %s, actual parameter %s', $this->getNumRows(), $row));
+            throw new OutOfRangeException(sprintf('Maximum row %s, actual parameter %s', $this->getNumRows(), $row));
         }
         $precision = $this->getPrecision($precision);
         $class = get_class($this);
@@ -143,7 +143,7 @@ class Matrix
     public function setRow($row, Matrix $base, $precision = null)
     {
         if ($this->getNumRows()<(int)$row) {
-            throw new OutOfRangeException(sprintf('Maximun row %s, actual parameter %s', $this->getNumRows(), $row));
+            throw new OutOfRangeException(sprintf('Maximum row %s, actual parameter %s', $this->getNumRows(), $row));
         }
         $precision = $this->getPrecision($precision);
         for ($col=1; $col<=$this->getNumCols(); $col++) {
@@ -161,7 +161,7 @@ class Matrix
     public function getCol($col, $precision = null)
     {
         if ($this->getNumCols()<(int)$col) {
-            throw new OutOfRangeException(sprintf('Maximun column %s, actual parameter %s', $this->getNumCols(), $col));
+            throw new OutOfRangeException(sprintf('Maximum column %s, actual parameter %s', $this->getNumCols(), $col));
         }
         $precision = $this->getPrecision($precision);
         $class = get_class($this);
@@ -183,7 +183,7 @@ class Matrix
     public function setCol($col, Matrix $base, $precision = null)
     {
         if ($this->getNumCols()<(int)$col) {
-            throw new OutOfRangeException(sprintf('Maximun column %s, actual parameter %s', $this->getNumCols(), $col));
+            throw new OutOfRangeException(sprintf('Maximum column %s, actual parameter %s', $this->getNumCols(), $col));
         }
         $precision = $this->getPrecision($precision);
         for ($row=1; $row<=$this->getNumCols(); $row++) {
