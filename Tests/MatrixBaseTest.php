@@ -10,8 +10,6 @@ namespace Skilla\Matrix\Test;
 
 use Skilla\Matrix\MatrixBase;
 
-include_once "lib/MatrixBase.php";
-
 class MatrixBaseTest extends \PHPUnit_Framework_TestCase
 {
     /**
@@ -168,6 +166,10 @@ class MatrixBaseTest extends \PHPUnit_Framework_TestCase
      */
     public function testIsMatrixEquals(MatrixBase $matriz)
     {
+        $tmp = new MatrixBase(3, 2);
+        $this->assertFalse($matriz->isMatrixEquals($tmp));
+        $tmp = new MatrixBase(2, 3);
+        $this->assertFalse($matriz->isMatrixEquals($tmp));
         $tmp = new MatrixBase(3, 3);
         $this->assertFalse($matriz->isMatrixEquals($tmp));
         $tmp->setPoint(1, 1, 1);

@@ -27,6 +27,8 @@ class MatrixBase
         $this->precision = (int)$precision;
         $this->valueZero = bcadd(0, 0, $this->precision);
         $this->valueOne = bcadd(0, 1, $this->precision);
+        $this->m = 0;
+        $this->n = 0;
         if ($m>0 && $n>0) {
             for ($i = 1; $i <= $m; $i++) {
                 $this->matriz[$i] = array();
@@ -34,6 +36,8 @@ class MatrixBase
                     $this->matriz[$i][$j] = $this->valueZero;
                 }
             }
+            $this->m = $m;
+            $this->n = $n;
         }
     }
 
@@ -42,9 +46,6 @@ class MatrixBase
      */
     public function getNumRows()
     {
-        if (is_null($this->m)) {
-            $this->m = count($this->matriz);
-        }
         return $this->m;
     }
 
@@ -53,13 +54,6 @@ class MatrixBase
      */
     public function getNumCols()
     {
-        if (is_null($this->n)) {
-            if ($this->getNumRows() > 0) {
-                $this->n = count($this->matriz[1]);
-            } else {
-                $this->n = 0;
-            }
-        }
         return $this->n;
     }
 
@@ -82,7 +76,7 @@ class MatrixBase
      */
     public function setPoint($row, $col, $value, $precision = null)
     {
-        $precision = is_null($precision) ? $this->precision : (int)$precision;
+        $precision = $this->getPrecision($precision);
         $this->matriz[$row][$col] = bcadd($this->valueZero, $value, $precision);
     }
 
@@ -93,7 +87,7 @@ class MatrixBase
      */
     public function getRow($row, $precision = null)
     {
-        $precision = is_null($precision) ? $this->precision : (int)$precision;
+        $precision = $this->getPrecision($precision);
         $class = get_class($this);
         /**
          * @var MatrixBase $tr
@@ -112,7 +106,7 @@ class MatrixBase
      */
     public function setRow($row, MatrixBase $base, $precision = null)
     {
-        $precision = is_null($precision) ? $this->precision : (int)$precision;
+        $precision = $this->getPrecision($precision);
         for ($j=1; $j<=$this->getNumCols(); $j++) {
             $this->setPoint($row, $j, $base->getPoint(1, $j, $precision), $precision);
         }
@@ -125,7 +119,7 @@ class MatrixBase
      */
     public function getCol($col, $precision = null)
     {
-        $precision = is_null($precision) ? $this->precision : (int)$precision;
+        $precision = $this->getPrecision($precision);
         $class = get_class($this);
         /**
          * @var MatrixBase $tr
@@ -144,7 +138,7 @@ class MatrixBase
      */
     public function setCol($col, MatrixBase $base, $precision = null)
     {
-        $precision = is_null($precision) ? $this->precision : (int)$precision;
+        $precision = $this->getPrecision($precision);
         for ($i=1; $i<=$this->getNumCols(); $i++) {
             $this->setPoint($i, 1, $base->getPoint($i, $col, $precision), $precision);
         }
@@ -356,11 +350,11 @@ class MatrixBase
      */
     public function isMatrixEquals(MatrixBase $base, $precision = null)
     {
-        $precision = is_null($precision) ? $this->precision : (int)$precision;
-        if ($this->getNumRows() != $base->getNumRows()) {
+        $precision = $this->getPrecision($precision);
+        if ($this->getNumCols() != $base->getNumCols()) {
             return false;
         }
-        if ($this->getNumCols() != $base->getNumCols()) {
+        if ($this->getNumRows() != $base->getNumRows()) {
             return false;
         }
         $equals = true;
@@ -382,7 +376,7 @@ class MatrixBase
      */
     public function transposed($precision = null)
     {
-        $precision = is_null($precision) ? $this->precision : (int)$precision;
+        $precision = $this->getPrecision($precision);
         $class = get_class($this);
         /**
          * @var MatrixBase $tr
@@ -410,7 +404,7 @@ class MatrixBase
      */
     public function getAdjunto($i, $j, $precision = null)
     {
-        $precision = is_null($precision) ? $this->precision : (int)$precision;
+        $precision = $this->getPrecision($precision);
         $class = get_class($this);
         /**
          * @var MatrixBase $tr
@@ -431,7 +425,7 @@ class MatrixBase
 
     public function determinant($precision = null)
     {
-        $precision = is_null($precision) ? $this->precision : (int)$precision;
+        $precision = $this->getPrecision($precision);
         $determinante = $this->valueZero;
         if ($this->isSquare()) {
             if ($this->getNumRows()==1) {
@@ -549,7 +543,7 @@ class MatrixBase
      */
     public function trace($precision = null)
     {
-        $precision = is_null($precision) ? $this->precision : (int)$precision;
+        $precision = $this->getPrecision($precision);
         $trace = bcadd(0, 0, $precision);
         for ($i=1; $i<=$this->getNumRows(); $i++) {
             $trace = bcadd(
@@ -568,7 +562,7 @@ class MatrixBase
      */
     public function summation(MatrixBase $base, $precision = null)
     {
-        $precision = is_null($precision) ? $this->precision : (int)$precision;
+        $precision = $this->getPrecision($precision);
         $class = get_class($this);
         /**
          * @var MatrixBase $tr
@@ -597,7 +591,7 @@ class MatrixBase
      */
     public function subtraction(MatrixBase $base, $precision = null)
     {
-        $precision = is_null($precision) ? $this->precision : (int)$precision;
+        $precision = $this->getPrecision($precision);
         $class = get_class($this);
         /**
          * @var MatrixBase $tr
@@ -626,7 +620,7 @@ class MatrixBase
      */
     public function multiplicationScalar($scalar, $precision = null)
     {
-        $precision = is_null($precision) ? $this->precision : (int)$precision;
+        $precision = $this->getPrecision($precision);
         $class = get_class($this);
         /**
          * @var MatrixBase $tr
@@ -655,7 +649,7 @@ class MatrixBase
      */
     public function divisionScalar($scalar, $precision = null)
     {
-        $precision = is_null($precision) ? $this->precision : (int)$precision;
+        $precision = $this->getPrecision($precision);
         $class = get_class($this);
         /**
          * @var MatrixBase $tr
@@ -685,7 +679,7 @@ class MatrixBase
      */
     public function multiplicationMatrix(MatrixBase $base, $precision = null)
     {
-        $precision = is_null($precision) ? $this->precision : (int)$precision;
+        $precision = $this->getPrecision($precision);
         $class = get_class($this);
 
         if ($this->getNumCols()!=$base->getNumRows()) {
@@ -724,7 +718,7 @@ class MatrixBase
      */
     public function inversa($precision = null)
     {
-        $precision = is_null($precision) ? $this->precision : (int)$precision;
+        $precision = $this->getPrecision($precision);
         $class = get_class($this);
         /**
          * @var MatrixBase $inversa
@@ -855,7 +849,7 @@ class MatrixBase
      */
     public function bcpi($precision = null)
     {
-        $precision = is_null($precision) ? $this->precision : (int)$precision;
+        $precision = $this->getPrecision($precision);
         $limit = ceil(log($precision)/log(2))-1;
         $precision = $precision+6;
         $a = 1;
@@ -875,14 +869,26 @@ class MatrixBase
         return bcdiv(bcpow(bcadd($a, $b, $precision), 2, $precision), bcmul(4, $t, $precision), $precision);
     }
 
+    /**
+     * @param int|null $precision
+     */
     public function pretty($precision = null)
     {
-        $precision = is_null($precision) ? $this->precision : (int)$precision;
+        $precision = $this->getPrecision($precision);
         for ($j=1; $j<=$this->getNumCols(); $j++) {
             for ($i = 1; $i <= $this->getNumRows(); $i++) {
                 echo str_pad($this->getPoint($i, $j), $precision+10, ' ', STR_PAD_LEFT)."  ";
             }
             echo "\n";
         }
+    }
+
+    /**
+     * @param $precision
+     * @return int
+     */
+    private function getPrecision($precision)
+    {
+        return is_null($precision) ? $this->precision : (int)$precision;
     }
 }
