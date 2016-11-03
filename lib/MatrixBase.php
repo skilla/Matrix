@@ -891,4 +891,17 @@ class MatrixBase
     {
         return is_null($precision) ? $this->precision : (int)$precision;
     }
+
+
+    public function adjugate()
+    {
+        // http://www.ditutor.com/matrices/matriz_inversa.html
+        // http://www.ditutor.com/determinantes/matriz_adjunta.html
+        // https://es.wikipedia.org/wiki/Matriz_de_adjuntos
+    }
+
+    public function cofactores()
+    {
+        // https://es.wikipedia.org/wiki/Matriz_de_adjuntos
+    }
 }

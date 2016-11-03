@@ -41,10 +41,8 @@ class Properties
      */
     public function isZero()
     {
-        for ($row=1; $row<=$this->matrix->getNumRows(); $row++)
-        {
-            for ($col=1; $col<=$this->matrix->getNumCols(); $col++)
-            {
+        for ($row=1; $row<=$this->matrix->getNumRows(); $row++) {
+            for ($col=1; $col<=$this->matrix->getNumCols(); $col++) {
                 if ($this->matrix->getPoint($row, $col)!==$this->valueZero) {
                     return false;
                 }
@@ -70,20 +68,19 @@ class Properties
         if (!$this->isSquare()) {
             return false;
         }
-        for ($row=1; $row<=$this->matrix->getNumCols(); $row++)
-        {
-            for ($col=$row+1; $col<=$this->matrix->getNumRows(); $col++)
-            {
-                if (
-                    $this->matrix->getPoint($row, $col, $this->precision)!==$this->valueZero
-                    ||
-                    $this->matrix->getPoint($col, $row, $this->precision)!==$this->valueZero
-                ) {
+        for ($row=1; $row<=$this->matrix->getNumCols(); $row++) {
+            for ($col=$row+1; $col<=$this->matrix->getNumRows(); $col++) {
+                if ( !$this->checkZero($row, $col) || !$this->checkZero($col, $row)) {
                     return false;
                 }
             }
         }
         return true;
+    }
+
+    private function checkZero($row, $col)
+    {
+        return $this->matrix->getPoint($row, $col, $this->precision)===$this->valueZero;
     }
 
     /**
