@@ -117,7 +117,8 @@ class MatrixBaseTest extends \PHPUnit_Framework_TestCase
      */
     public function testIsTriangularUpper(MatrixBase $matriz)
     {
-        $this->assertTrue($matriz->isTriangularUpper());
+        $matriz->setPoint(3, 1, 1);
+        $this->assertFalse($matriz->isTriangularUpper());
         $tmp = new MatrixBase(3, 3);
         $tmp->setPoint(1, 1, 1);
         $tmp->setPoint(1, 2, 1);
@@ -136,7 +137,8 @@ class MatrixBaseTest extends \PHPUnit_Framework_TestCase
      */
     public function testIsTriangularLower(MatrixBase $matriz)
     {
-        $this->assertTrue($matriz->isTriangularLower());
+        $matriz->pretty();die();
+        $this->assertFalse($matriz->isTriangularLower());
         $tmp = new MatrixBase(3, 3);
         $tmp->setPoint(1, 1, 1);
         $tmp->setPoint(2, 1, 1);

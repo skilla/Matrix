@@ -784,13 +784,7 @@ class MatrixBase
      */
     public function pretty($precision = null)
     {
-        $precision = $this->getPrecision($precision);
-        for ($j=1; $j<=$this->getNumCols(); $j++) {
-            for ($i = 1; $i <= $this->getNumRows(); $i++) {
-                echo str_pad($this->getPoint($i, $j), $precision+10, ' ', STR_PAD_LEFT)."  ";
-            }
-            echo "\n";
-        }
+        $this->matrix->printPretty($precision);
     }
 
     /**
