@@ -52,7 +52,7 @@ class MatrixBaseTest extends \PHPUnit_Framework_TestCase
      */
     public function testIsNull(MatrixBase $matriz)
     {
-        $this->assertFalse($matriz->isNull());
+        $this->assertTrue($matriz->isNull());
         return $matriz;
     }
 
@@ -78,7 +78,7 @@ class MatrixBaseTest extends \PHPUnit_Framework_TestCase
      */
     public function testIsScalar(MatrixBase $matriz)
     {
-        $this->assertFalse($matriz->isScalar());
+        $this->assertTrue($matriz->isScalar());
         $tmp = new MatrixBase(1, 1);
         $this->assertTrue($tmp->isScalar());
         return $matriz;
@@ -117,7 +117,7 @@ class MatrixBaseTest extends \PHPUnit_Framework_TestCase
      */
     public function testIsTriangularUpper(MatrixBase $matriz)
     {
-        $this->assertFalse($matriz->isTriangularUpper());
+        $this->assertTrue($matriz->isTriangularUpper());
         $tmp = new MatrixBase(3, 3);
         $tmp->setPoint(1, 1, 1);
         $tmp->setPoint(1, 2, 1);
@@ -136,7 +136,7 @@ class MatrixBaseTest extends \PHPUnit_Framework_TestCase
      */
     public function testIsTriangularLower(MatrixBase $matriz)
     {
-        $this->assertFalse($matriz->isTriangularLower());
+        $this->assertTrue($matriz->isTriangularLower());
         $tmp = new MatrixBase(3, 3);
         $tmp->setPoint(1, 1, 1);
         $tmp->setPoint(2, 1, 1);

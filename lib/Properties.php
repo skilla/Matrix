@@ -68,9 +68,9 @@ class Properties
         if (!$this->isSquare()) {
             return false;
         }
-        for ($row=1; $row<=$this->matrix->getNumCols(); $row++) {
-            for ($col=$row+1; $col<=$this->matrix->getNumRows(); $col++) {
-                if ( !$this->checkZero($row, $col) || !$this->checkZero($col, $row)) {
+        for ($row=1; $row<=$this->matrix->getNumRows(); $row++) {
+            for ($col=$row+1; $col<=$this->matrix->getNumCols(); $col++) {
+                if ( !$this->pointIsZero($row, $col) || !$this->pointIsZero($col, $row)) {
                     return false;
                 }
             }
@@ -78,7 +78,7 @@ class Properties
         return true;
     }
 
-    private function checkZero($row, $col)
+    private function pointIsZero($row, $col)
     {
         return $this->matrix->getPoint($row, $col, $this->precision)===$this->valueZero;
     }
@@ -91,9 +91,9 @@ class Properties
         if (!$this->isDiagonal()) {
             return false;
         }
-        $dato = $this->matrix->getPoint(1, 1, $this->precision);
+        $value = $this->matrix->getPoint(1, 1, $this->precision);
         for ($m=2; $m<=$this->matrix->getNumRows(); $m++) {
-            if ($dato !== $this->matrix->getPoint($m, $m)) {
+            if ($value !== $this->matrix->getPoint($m, $m, $this->precision)) {
                 return false;
             }
         }
@@ -132,16 +132,12 @@ class Properties
         return true;
     }
 
-
-
-
-
     /**
      * @return bool
      */
     public function isRowVector()
     {
-        return $this->getNumRows() == 1 && $this->getNumCols() > 1;
+        return $this->matrix->getNumRows() === 1 && $this->matrix->getNumCols() >= 1;
     }
 
     /**
@@ -149,170 +145,101 @@ class Properties
      */
     public function isColVector()
     {
-        return $this->getNumRows() > 1 && $this->getNumCols() == 1;
+        return $this->matrix->getNumRows() >= 1 && $this->matrix->getNumCols() === 1;
     }
 
     /**
-     * @param $functionName
-     * @return string
+     * @param Matrix $base
+     * @return bool
      */
-    private function privateSumDiagonal($functionName)
+    public function isEquals(Matrix $base)
     {
-        $sum = $this->valueZero;
-        for ($i = 1; $i <= $this->getNumRows(); $i++) {
-            $sum = bcadd(
-                $sum,
-                call_user_func(
-                    array($this, $functionName),
-                    $this->getPoint($i, $i, $this->precision)
-                ),
-                $this->precision
-            );
+        $local = $this->matrix;
+        $precision = $this->precision;
+
+        if ($local->getNumCols() !== $base->getNumCols() || $local->getNumRows() !== $base->getNumRows()) {
+            return false;
         }
-        return $sum;
-    }
 
-    private function equalZero($a)
-    {
-        return bccomp($a, $this->valueZero, $this->precision) == 0;
-    }
-
-    private function equalUnit($a)
-    {
-        return bccomp($a, $this->valueOne, $this->precision) == 0;
-    }
-
-    private function greaterZero($a)
-    {
-        return bccomp($a, $this->valueZero, $this->precision) >= 0;
-    }
-
-    private function privateIsTriangularUpperZero()
-    {
-        $isZero = true;
-        for ($i = 1; $i <= $this->getNumRows() && $isZero; $i++) {
-            for ($j = $i + 1; $j <= $this->getNumCols() && $isZero; $j++) {
-                if (bccomp($this->valueZero, $this->getPoint($i, $j, $this->precision), $this->precision) != 0) {
-                    $isZero = false;
+        for ($i = 1; $i <= $local->getNumRows(); $i++) {
+            for ($j = 1; $j <= $local->getNumCols(); $j++) {
+                if ($local->getPoint($i, $j, $precision) !== $base->getPoint($i, $j, $precision)) {
+                    return false;
                 }
             }
         }
-        return $isZero;
+        return true;
     }
 
-    private function privateIsTriangularLowerZero()
+    /**
+     * @return bool
+     */
+    public function isSymmetric()
     {
-        $isZero = true;
-        for ($i = 2; $i <= $this->getNumRows() && $isZero; $i++) {
-            for ($j = 1; $j < $i && $isZero; $j++) {
-                if (bccomp($this->valueZero, $this->getPoint($i, $j, $this->precision), $this->precision) != 0) {
-                    $isZero = false;
+        if (!$this->isSquare()) {
+            return false;
+        }
+
+        $local = $this->matrix;
+        $precision = $this->precision;
+
+        for ($i = 1; $i <= $local->getNumRows(); $i++) {
+            for ($j = $i; $j <= $local->getNumCols(); $j++) {
+                if ($local->getPoint($i, $j, $precision) !== $local->getPoint($j, $i, $precision)) {
+                    return false;
                 }
             }
         }
-        return $isZero;
+        return true;
     }
 
     public function isTriangularUpper()
     {
-        return
-            $this->isSquare() &&
-            $this->getNumRows() > 1 &&
-            !$this->privateIsDiagonalZero() &&
-            $this->privateIsTriangularLowerZero() &&
-            !$this->privateIsTriangularUpperZero();
+        if (!$this->isSquare()) {
+            return false;
+        }
+
+        $local = $this->matrix;
+        $precision = $this->precision;
+
+        $valuesOnUpper = false;
+        for ($i=1; $i<=$local->getNumRows(); $i++) {
+            for ($j=1; $j<=$local->getNumCols(); $j++) {
+                $hasValue = $local->getPoint($i, $j, $precision) > $this->valueZero;
+                if ($i <= $j) {
+                    $valuesOnUpper = $valuesOnUpper || $hasValue;
+                } else {
+                    if ($hasValue) {
+                        return false;
+                    }
+                }
+            }
+        }
+        return $valuesOnUpper;
     }
 
     public function isTriangularLower()
     {
-        return
-            $this->isSquare() &&
-            $this->getNumRows() > 1 &&
-            !$this->privateIsDiagonalZero() &&
-            !$this->privateIsTriangularLowerZero() &&
-            $this->privateIsTriangularUpperZero();
-    }
+        if (!$this->isSquare()) {
+            return false;
+        }
 
-    public function isDiagonalScalar()
-    {
-        $isScalar = $this->isDiagonal();
+        $local = $this->matrix;
+        $precision = $this->precision;
 
-        if ($isScalar) {
-            $origin = $this->getPoint(1, 1);
-            if (
-                bccomp($this->valueZero, $origin, $this->precision)==0 ||
-                bccomp($this->valueOne, $origin, $this->precision)==1
-            ) {
-                $isScalar = false;
-            }
-            for ($i = 2; $i <= $this->getNumRows() && $isScalar; $i++) {
-                if (bccomp($this->getPoint($i - 1, $i - 1), $origin, $this->precision)==0) {
-                    $isScalar = false;
+        $valuesOnLower = false;
+        for ($i=1; $i<=$local->getNumRows(); $i++) {
+            for ($j=1; $j<=$local->getNumCols(); $j++) {
+                $hasValue = $local->getPoint($i, $j, $precision) > $this->valueZero;
+                if ($i >= $j) {
+                    $valuesOnLower = $valuesOnLower || $hasValue;
+                } else {
+                    if ($hasValue) {
+                        return false;
+                    }
                 }
             }
         }
-        return $isScalar;
-    }
-
-    /**
-     * @param MatrixBase $base
-     * @param int|null $precision
-     * @return bool
-     */
-    public function isMatrixEquals(MatrixBase $base, $precision = null)
-    {
-        $precision = $this->getPrecision($precision);
-        if ($this->getNumCols() != $base->getNumCols()) {
-            return false;
-        }
-        if ($this->getNumRows() != $base->getNumRows()) {
-            return false;
-        }
-        $equals = true;
-        for ($i = 1; $i <= $this->getNumRows() && $equals; $i++) {
-            for ($j = 1; $j <= $this->getNumCols() && $equals; $j++) {
-                $equals = bccomp(
-                    $this->getPoint($i, $j, $precision),
-                    $base->getPoint($i, $j, $precision),
-                    $this->precision
-                ) == 0;
-            }
-        }
-        return $equals;
-    }
-
-    /**
-     * @param int|null $precision
-     * @return MatrixBase
-     */
-    public function transposed($precision = null)
-    {
-        $precision = $this->getPrecision($precision);
-        $class = get_class($this);
-        /**
-         * @var MatrixBase $tr
-         */
-        $tr = new $class($this->getNumCols(), $this->getNumRows(), $precision);
-        for ($i = 1; $i <= $this->getNumRows(); $i++) {
-            for ($j = 1; $j <= $this->getNumCols(); $j++) {
-                $tr->setPoint($j, $i, $this->getPoint($i, $j, $precision), $precision);
-            }
-        }
-        return $tr;
-    }
-
-    public function isSymmetric()
-    {
-        $tr = $this->transposed();
-        return $this->isMatrixEquals($tr);
-    }
-
-    /**
-     * @param $precision
-     * @return int
-     */
-    private function getPrecision($precision)
-    {
-        return is_null($precision) ? $this->precision : (int)$precision;
+        return $valuesOnLower;
     }
 }

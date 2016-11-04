@@ -18,10 +18,7 @@ class PropertiesTest extends \PHPUnit_Framework_TestCase
         $matrix = new Matrix(3, 3, 2);
         $sut = new Properties($matrix, 2);
         $this->assertTrue($sut->isSquare());
-    }
 
-    public function testNotIsSquare()
-    {
         $matrix = new Matrix(2, 3, 2);
         $sut = new Properties($matrix, 2);
         $this->assertFalse($sut->isSquare());
@@ -33,10 +30,7 @@ class PropertiesTest extends \PHPUnit_Framework_TestCase
         $sut = new Properties($matrix, 2);
         $this->assertTrue($sut->isZero());
         $this->assertTrue($sut->isNull());
-    }
 
-    public function testNotIsZeroAndNotIsNull()
-    {
         $matrix = new Matrix(3, 3, 2);
         $matrix->setPoint(1, 3, -5, 2);
         $sut = new Properties($matrix, 2);
@@ -49,12 +43,13 @@ class PropertiesTest extends \PHPUnit_Framework_TestCase
         $matrix = new Matrix(3, 3, 2);
         $sut = new Properties($matrix, 2);
         $this->assertTrue($sut->isDiagonal());
-    }
 
-    public function testNotIsDiagonal()
-    {
         $matrix = new Matrix(3, 3, 2);
         $matrix->setPoint(1, 3, -5, 2);
+        $sut = new Properties($matrix, 2);
+        $this->assertFalse($sut->isDiagonal());
+
+        $matrix = new Matrix(3, 8, 2);
         $sut = new Properties($matrix, 2);
         $this->assertFalse($sut->isDiagonal());
     }
@@ -64,12 +59,13 @@ class PropertiesTest extends \PHPUnit_Framework_TestCase
         $matrix = new Matrix(3, 3, 2);
         $sut = new Properties($matrix, 2);
         $this->assertTrue($sut->isScalar());
-    }
 
-    public function testNotIsScalar()
-    {
         $matrix = new Matrix(3, 3, 2);
         $matrix->setPoint(3, 3, -5, 2);
+        $sut = new Properties($matrix, 2);
+        $this->assertFalse($sut->isScalar());
+
+        $matrix = new Matrix(3, 8, 2);
         $sut = new Properties($matrix, 2);
         $this->assertFalse($sut->isScalar());
     }
@@ -82,14 +78,15 @@ class PropertiesTest extends \PHPUnit_Framework_TestCase
         $matrix->setPoint(3, 3, 1, 2);
         $sut = new Properties($matrix, 2);
         $this->assertTrue($sut->isDiagonalUnit());
-    }
 
-    public function testNotIsDiagonalUnit()
-    {
         $matrix = new Matrix(3, 3, 2);
         $matrix->setPoint(1, 1, 1, 2);
         $matrix->setPoint(2, 2, 1, 2);
         $matrix->setPoint(3, 3, 3, 2);
+        $sut = new Properties($matrix, 2);
+        $this->assertFalse($sut->isDiagonalUnit());
+
+        $matrix = new Matrix(1, 3, 2);
         $sut = new Properties($matrix, 2);
         $this->assertFalse($sut->isDiagonalUnit());
     }
@@ -99,314 +96,170 @@ class PropertiesTest extends \PHPUnit_Framework_TestCase
         $matrix = new Matrix(3, 3, 2);
         $sut = new Properties($matrix, 2);
         $this->assertTrue($sut->isDiagonalZero());
-    }
 
-    public function testNotIsDiagonalZero()
-    {
         $matrix = new Matrix(3, 3, 2);
         $matrix->setPoint(3, 3, 3, 2);
         $sut = new Properties($matrix, 2);
         $this->assertFalse($sut->isDiagonalZero());
+
+        $matrix = new Matrix(1, 3, 2);
+        $sut = new Properties($matrix, 2);
+        $this->assertFalse($sut->isDiagonalZero());
     }
 
-
-
-
-
-
-
-
-
-
-
-
-    /**
-     * @expectedException \Skilla\Matrix\ParameterException
-     */
-    public function testConstructColumnsZero()
+    public function testIsRowVector()
     {
-        $matriz = new Matrix(3, 0, 2);
+        $matrix = new Matrix(1, 3, 2);
+        $sut = new Properties($matrix, 2);
+        $this->assertTrue($sut->isRowVector());
+
+        $matrix = new Matrix(1, 1, 2);
+        $sut = new Properties($matrix, 2);
+        $this->assertTrue($sut->isRowVector());
+
+        $matrix = new Matrix(2, 3, 2);
+        $sut = new Properties($matrix, 2);
+        $this->assertFalse($sut->isRowVector());
+
+        $matrix = new Matrix(3, 1, 2);
+        $sut = new Properties($matrix, 2);
+        $this->assertFalse($sut->isRowVector());
     }
 
-    /**
-     * @expectedException \Skilla\Matrix\ParameterException
-     */
-    public function testConstructRowsAndColumnsZero()
+    public function testIsColVector()
     {
-        $matriz = new Matrix(0, 0, 2);
+        $matrix = new Matrix(3, 1, 2);
+        $sut = new Properties($matrix, 2);
+        $this->assertTrue($sut->isColVector());
+
+        $matrix = new Matrix(1, 1, 2);
+        $sut = new Properties($matrix, 2);
+        $this->assertTrue($sut->isColVector());
+
+        $matrix = new Matrix(3, 2, 2);
+        $sut = new Properties($matrix, 2);
+        $this->assertFalse($sut->isColVector());
+
+        $matrix = new Matrix(1, 3, 2);
+        $sut = new Properties($matrix, 2);
+        $this->assertFalse($sut->isColVector());
     }
 
-    /**
-     * @expectedException \Skilla\Matrix\ParameterException
-     */
-    public function testConstructBadPrecision()
+    public function testIsEquals()
     {
-        $matriz = new Matrix(3, 3, -1);
+        $matrix = new Matrix(2, 3, 2);
+        $sut = new Properties($matrix, 2);
+
+        $base = new Matrix(2, 3, 2);
+        $this->assertTrue($sut->isEquals($base));
+
+        $matrix = new Matrix(2, 3, 2);
+        $sut = new Properties($matrix, 2);
+
+        $base = new Matrix(2, 3, 2);
+        $base->setPoint(1, 1, -3);
+        $this->assertFalse($sut->isEquals($base));
+
+        $base = new Matrix(2, 2, 2);
+        $this->assertFalse($sut->isEquals($base));
     }
 
-    public function testGetNumRows()
+    public function testIsSymmetric()
     {
-        $sut = new Matrix(3, 3, 2);
-        $this->assertEquals(3, $sut->getNumRows());
+        $matrix = new Matrix(3, 3, 2);
+        $matrix->setPoint(1, 1, 3);
+        $matrix->setPoint(1, 2, 7);
+        $matrix->setPoint(1, 3, 11);
+        $matrix->setPoint(2, 1, 7);
+        $matrix->setPoint(2, 2, 4);
+        $matrix->setPoint(2, 3, 16);
+        $matrix->setPoint(3, 1, 11);
+        $matrix->setPoint(3, 2, 16);
+        $matrix->setPoint(3, 3, 8);
+        $sut = new Properties($matrix, 2);
+        $this->assertTrue($sut->isSymmetric());
+
+        $matrix = new Matrix(1, 3, 2);
+        $sut = new Properties($matrix, 2);
+        $this->assertFalse($sut->isSymmetric());
+
+        $matrix = new Matrix(3, 3, 2);
+        $matrix->setPoint(1, 1, 3);
+        $matrix->setPoint(1, 2, 7);
+        $matrix->setPoint(1, 3, 11);
+        $matrix->setPoint(2, 1, 7);
+        $matrix->setPoint(2, 2, 4);
+        $matrix->setPoint(2, 3, 5);
+        $matrix->setPoint(3, 1, 11);
+        $matrix->setPoint(3, 2, 16);
+        $matrix->setPoint(3, 3, 8);
+        $sut = new Properties($matrix, 2);
+        $this->assertFalse($sut->isSymmetric());
     }
 
-    public function testGetNumCols()
+    public function testIsTriangularUpper()
     {
-        $sut = new Matrix(3, 3, 2);
-        $this->assertEquals(3, $sut->getNumCols());
+        $matrix = new Matrix(3, 3, 2);
+        $matrix->setPoint(1, 1, 0);
+        $matrix->setPoint(1, 2, 0);
+        $matrix->setPoint(1, 3, 1);
+        $matrix->setPoint(2, 1, 0);
+        $matrix->setPoint(2, 2, 0);
+        $matrix->setPoint(2, 3, 0);
+        $matrix->setPoint(3, 1, 0);
+        $matrix->setPoint(3, 2, 0);
+        $matrix->setPoint(3, 3, 0);
+        $sut = new Properties($matrix, 2);
+        $this->assertTrue($sut->isTriangularUpper());
+
+        $matrix = new Matrix(1, 3, 2);
+        $sut = new Properties($matrix, 2);
+        $this->assertFalse($sut->isTriangularUpper());
+
+        $matrix = new Matrix(3, 3, 2);
+        $matrix->setPoint(1, 1, 0);
+        $matrix->setPoint(1, 2, 0);
+        $matrix->setPoint(1, 3, 1);
+        $matrix->setPoint(2, 1, 0);
+        $matrix->setPoint(2, 2, 0);
+        $matrix->setPoint(2, 3, 0);
+        $matrix->setPoint(3, 1, 1);
+        $matrix->setPoint(3, 2, 0);
+        $matrix->setPoint(3, 3, 0);
+        $sut = new Properties($matrix, 2);
+        $this->assertFalse($sut->isTriangularUpper());
     }
 
-    public function testGetPoint()
+    public function testIsTriangularLower()
     {
-        $sut = new Matrix(3, 3, 2);
-        $this->assertEquals("0.00", $sut->getPoint(1, 1));
-        $this->assertEquals("0.00", $sut->getPoint(1, 2));
-        $this->assertEquals("0.00", $sut->getPoint(1, 3));
-        $this->assertEquals("0.00", $sut->getPoint(2, 1));
-        $this->assertEquals("0.00", $sut->getPoint(2, 2));
-        $this->assertEquals("0.00", $sut->getPoint(2, 3));
-        $this->assertEquals("0.00", $sut->getPoint(3, 1));
-        $this->assertEquals("0.00", $sut->getPoint(3, 2));
-        $this->assertEquals("0.00", $sut->getPoint(3, 3));
-    }
+        $matrix = new Matrix(3, 3, 2);
+        $matrix->setPoint(1, 1, 0);
+        $matrix->setPoint(1, 2, 0);
+        $matrix->setPoint(1, 3, 0);
+        $matrix->setPoint(2, 1, 0);
+        $matrix->setPoint(2, 2, 0);
+        $matrix->setPoint(2, 3, 0);
+        $matrix->setPoint(3, 1, 1);
+        $matrix->setPoint(3, 2, 0);
+        $matrix->setPoint(3, 3, 0);
+        $sut = new Properties($matrix, 2);
+        $this->assertTrue($sut->isTriangularLower());
 
-    /**
-     * @expectedException \Skilla\Matrix\OutOfRangeException
-     */
-    public function testGetPointOutOfRange()
-    {
-        $sut = new Matrix(3, 3, 2);
-        $sut->getPoint(4, 4);
-    }
+        $matrix = new Matrix(1, 3, 2);
+        $sut = new Properties($matrix, 2);
+        $this->assertFalse($sut->isTriangularLower());
 
-    public function testSetPointAndGetPoint()
-    {
-        $sut = new Matrix(3, 3, 2);
-        $sut->setPoint(1, 1, 2);
-        $sut->setPoint(1, 2, 3);
-        $sut->setPoint(1, 3, 4);
-        $sut->setPoint(2, 1, 3);
-        $sut->setPoint(2, 2, 4);
-        $sut->setPoint(2, 3, 5);
-        $sut->setPoint(3, 1, 4);
-        $sut->setPoint(3, 2, 5);
-        $sut->setPoint(3, 3, "6.00");
-
-        $this->assertEquals("2.00", $sut->getPoint(1, 1));
-        $this->assertEquals("3.00", $sut->getPoint(1, 2));
-        $this->assertEquals("4.00", $sut->getPoint(1, 3));
-        $this->assertEquals("3.00", $sut->getPoint(2, 1));
-        $this->assertEquals("4.00", $sut->getPoint(2, 2));
-        $this->assertEquals("5.00", $sut->getPoint(2, 3));
-        $this->assertEquals("4.00", $sut->getPoint(3, 1));
-        $this->assertEquals("5.00", $sut->getPoint(3, 2));
-        $this->assertEquals("6.00", $sut->getPoint(3, 3));
-    }
-
-    /**
-     * @expectedException \Skilla\Matrix\OutOfRangeException
-     */
-    public function testSetPointOutOfRange()
-    {
-        $sut = new Matrix(3, 3, 2);
-        $sut->setPoint(4, 4, 0);
-    }
-
-    public function testGetRowAndGetCol()
-    {
-        $sut = new Matrix(3, 3, 2);
-        $sut->setPoint(1, 1, 2);
-        $sut->setPoint(1, 2, 3);
-        $sut->setPoint(1, 3, 4);
-        $sut->setPoint(2, 1, 3);
-        $sut->setPoint(2, 2, 4);
-        $sut->setPoint(2, 3, 5);
-        $sut->setPoint(3, 1, 4);
-        $sut->setPoint(3, 2, 5);
-        $sut->setPoint(3, 3, "6.00");
-
-        $this->assertEquals("2.00", $sut->getRow(1)->getPoint(1, 1));
-        $this->assertEquals("3.00", $sut->getRow(1)->getPoint(1, 2));
-        $this->assertEquals("4.00", $sut->getRow(1)->getPoint(1, 3));
-        $this->assertEquals("3.00", $sut->getRow(2)->getPoint(1, 1));
-        $this->assertEquals("4.00", $sut->getRow(2)->getPoint(1, 2));
-        $this->assertEquals("5.00", $sut->getRow(2)->getPoint(1, 3));
-        $this->assertEquals("4.00", $sut->getRow(3)->getPoint(1, 1));
-        $this->assertEquals("5.00", $sut->getRow(3)->getPoint(1, 2));
-        $this->assertEquals("6.00", $sut->getRow(3)->getPoint(1, 3));
-
-        $this->assertEquals("2.00", $sut->getCol(1)->getPoint(1, 1));
-        $this->assertEquals("3.00", $sut->getCol(1)->getPoint(2, 1));
-        $this->assertEquals("4.00", $sut->getCol(1)->getPoint(3, 1));
-        $this->assertEquals("3.00", $sut->getCol(2)->getPoint(1, 1));
-        $this->assertEquals("4.00", $sut->getCol(2)->getPoint(2, 1));
-        $this->assertEquals("5.00", $sut->getCol(2)->getPoint(3, 1));
-        $this->assertEquals("4.00", $sut->getCol(3)->getPoint(1, 1));
-        $this->assertEquals("5.00", $sut->getCol(3)->getPoint(2, 1));
-        $this->assertEquals("6.00", $sut->getCol(3)->getPoint(3, 1));
-    }
-
-    /**
-     * @expectedException \Skilla\Matrix\OutOfRangeException
-     */
-    public function testGetRowOutOfRange()
-    {
-        $sut = new Matrix(3, 3, 2);
-        $sut->getRow(4);
-    }
-
-    /**
-     * @expectedException \Skilla\Matrix\OutOfRangeException
-     */
-    public function testGetColOutOfRange()
-    {
-        $sut = new Matrix(3, 3, 2);
-        $sut->getCol(4);
-    }
-
-    public function testSetRow()
-    {
-        $sut = new Matrix(3, 3, 2);
-
-        $tmp = new Matrix(1, 3, 2);
-        $tmp->setPoint(1, 1, 2);
-        $tmp->setPoint(1, 2, 3);
-        $tmp->setPoint(1, 3, 4);
-        $sut->setRow(1, $tmp);
-
-        $tmp = new Matrix(1, 3, 2);
-        $tmp->setPoint(1, 1, 3);
-        $tmp->setPoint(1, 2, 4);
-        $tmp->setPoint(1, 3, 5);
-        $sut->setRow(2, $tmp);
-
-        $tmp = new Matrix(1, 3, 2);
-        $tmp->setPoint(1, 1, 4);
-        $tmp->setPoint(1, 2, 5);
-        $tmp->setPoint(1, 3, "6.00");
-        $sut->setRow(3, $tmp);
-
-
-        $this->assertEquals("2.00", $sut->getPoint(1, 1));
-        $this->assertEquals("3.00", $sut->getPoint(1, 2));
-        $this->assertEquals("4.00", $sut->getPoint(1, 3));
-        $this->assertEquals("3.00", $sut->getPoint(2, 1));
-        $this->assertEquals("4.00", $sut->getPoint(2, 2));
-        $this->assertEquals("5.00", $sut->getPoint(2, 3));
-        $this->assertEquals("4.00", $sut->getPoint(3, 1));
-        $this->assertEquals("5.00", $sut->getPoint(3, 2));
-        $this->assertEquals("6.00", $sut->getPoint(3, 3));
-    }
-
-    /**
-     * @expectedException \Skilla\Matrix\OutOfRangeException
-     */
-    public function testSetRowOutOfRange()
-    {
-        $sut = new Matrix(3, 3, 2);
-        $sut->setRow(4, new Matrix(1, 3, 2));
-    }
-
-    public function testSetCol()
-    {
-        $sut = new Matrix(3, 3, 2);
-        $tmp = new Matrix(3, 1, 2);
-        $tmp->setPoint(1, 1, 2);
-        $tmp->setPoint(2, 1, 3);
-        $tmp->setPoint(3, 1, 4);
-        $sut->setCol(1, $tmp);
-
-        $tmp = new Matrix(3, 1, 2);
-        $tmp->setPoint(1, 1, 3);
-        $tmp->setPoint(2, 1, 4);
-        $tmp->setPoint(3, 1, 5);
-        $sut->setCol(2, $tmp);
-
-        $tmp = new Matrix(3, 1, 2);
-        $tmp->setPoint(1, 1, 4);
-        $tmp->setPoint(2, 1, 5);
-        $tmp->setPoint(3, 1, "6.00");
-        $sut->setCol(3, $tmp);
-
-        $this->assertEquals("2.00", $sut->getPoint(1, 1));
-        $this->assertEquals("3.00", $sut->getPoint(1, 2));
-        $this->assertEquals("4.00", $sut->getPoint(1, 3));
-        $this->assertEquals("3.00", $sut->getPoint(2, 1));
-        $this->assertEquals("4.00", $sut->getPoint(2, 2));
-        $this->assertEquals("5.00", $sut->getPoint(2, 3));
-        $this->assertEquals("4.00", $sut->getPoint(3, 1));
-        $this->assertEquals("5.00", $sut->getPoint(3, 2));
-        $this->assertEquals("6.00", $sut->getPoint(3, 3));
-    }
-
-    /**
-     * @expectedException \Skilla\Matrix\OutOfRangeException
-     */
-    public function testSetColOutOfRange()
-    {
-        $sut = new Matrix(3, 3, 2);
-        $sut->setCol(4, new Matrix(3, 1, 2));
-    }
-
-
-    public function testToArray()
-    {
-        $sut = new Matrix(3, 3, 2);
-        $sut->setPoint(1, 1, 2);
-        $sut->setPoint(1, 2, 3);
-        $sut->setPoint(1, 3, 4);
-        $sut->setPoint(2, 1, 3);
-        $sut->setPoint(2, 2, 4);
-        $sut->setPoint(2, 3, 5);
-        $sut->setPoint(3, 1, 4);
-        $sut->setPoint(3, 2, 5);
-        $sut->setPoint(3, 3, "6.00");
-        $actual = $sut->toArray();
-
-        $expected = array(
-            1 => array(
-                1 => "2.00",
-                2 => "3.00",
-                3 => "4.00",
-            ),
-            2 => array(
-                1 => "3.00",
-                2 => "4.00",
-                3 => "5.00",
-            ),
-            3 => array(
-                1 => "4.00",
-                2 => "5.00",
-                3 => "6.00",
-            ),
-        );
-        $this->assertEquals($expected, $actual);
-        $this->assertTrue($expected[2][2]===$actual[2][2]);
-    }
-
-    public function testPrintPretty()
-    {
-        $sut = new Matrix(3, 3, 2);
-        $sut->setPoint(1, 1, 2);
-        $sut->setPoint(1, 2, 3);
-        $sut->setPoint(1, 3, 4);
-        $sut->setPoint(2, 1, 3);
-        $sut->setPoint(2, 2, 4);
-        $sut->setPoint(2, 3, 5);
-        $sut->setPoint(3, 1, 4);
-        $sut->setPoint(3, 2, 5);
-        $sut->setPoint(3, 3, "6.00");
-
-        ob_start();
-        $sut->printPretty();
-        $response = ob_get_clean();
-        $this->assertContains('2.00', $response);
-        $this->assertContains('3.00', $response);
-        $this->assertContains('4.00', $response);
-        $this->assertContains('5.00', $response);
-        $this->assertContains('6.00', $response);
-
-        $actual = "        2.00          3.00          4.00  \n        3.00          4.00          5.00  \n        4.00          5.00          6.00  \n";
-        $this->assertEquals($actual, $response);
+        $matrix = new Matrix(3, 3, 2);
+        $matrix->setPoint(1, 1, 0);
+        $matrix->setPoint(1, 2, 0);
+        $matrix->setPoint(1, 3, 1);
+        $matrix->setPoint(2, 1, 0);
+        $matrix->setPoint(2, 2, 0);
+        $matrix->setPoint(2, 3, 0);
+        $matrix->setPoint(3, 1, 1);
+        $matrix->setPoint(3, 2, 0);
+        $matrix->setPoint(3, 3, 0);
+        $sut = new Properties($matrix, 2);
+        $this->assertFalse($sut->isTriangularLower());
     }
 }
