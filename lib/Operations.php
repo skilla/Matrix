@@ -43,4 +43,47 @@ class Operations
         }
         return $transposed;
     }
+
+    /**
+     * @return Matrix
+     * @throws NotSquareException
+     */
+    public function adjugateMatrix()
+    {
+        if (!$this->properties->isSquare()) {
+            throw new NotSquareException();
+        }
+
+        $adjugate = new Matrix($this->matrix->getNumRows(), $this->matrix->getNumCols(), $this->precision);
+
+        for ($i=1; $i<=$this->matrix->getNumRows(); $i++) {
+            for ($j=1; $j<=$this->matrix->getNumCols(); $j++) {
+                $adjugate->setPoint($j, $i, $this->cofactor($i, $j));
+            }
+        }
+        return $adjugate;
+    }
+
+    public function cofactorMatrix()
+    {
+        if (!$this->properties->isSquare()) {
+            throw new NotSquareException();
+        }
+
+
+    }
+
+    public function determinant()
+    {
+        if (!$this->properties->isSquare()) {
+            throw new NotSquareException();
+        }
+        if ($this->matrix->getNumRows()===1) {
+            return $this->matrix->getPoint(1, 1);
+        } elseif ($this->matrix->getNumRows()===2) {
+            $mainDiagonal = bcmul($this->matrix->getPoint(1, 1), $this->matrix->getPoint(2, 2), $this->precision);
+            $secondaryDiagonal = bcmul($this->matrix->getPoint(1, 2), $this->matrix->getPoint(2, 1), $this->precision);
+            return bcsub($mainDiagonal, $secondaryDiagonal, $this->precision);
+        }
+    }
 }

@@ -205,7 +205,7 @@ class Properties
         $valuesOnUpper = false;
         for ($i=1; $i<=$local->getNumRows(); $i++) {
             for ($j=1; $j<=$local->getNumCols(); $j++) {
-                $hasValue = $local->getPoint($i, $j, $precision) > $this->valueZero;
+                $hasValue = $local->getPoint($i, $j, $precision) !== $this->valueZero;
                 if ($i <= $j) {
                     $valuesOnUpper = $valuesOnUpper || $hasValue;
                 } else {
@@ -230,8 +230,8 @@ class Properties
         $valuesOnLower = false;
         for ($i=1; $i<=$local->getNumRows(); $i++) {
             for ($j=1; $j<=$local->getNumCols(); $j++) {
-                $hasValue = $local->getPoint($i, $j, $precision) > $this->valueZero;
-                if ($i >= $j) {
+                $hasValue = $local->getPoint($i, $j, $precision) !== $this->valueZero;
+                if ($j <= $i) {
                     $valuesOnLower = $valuesOnLower || $hasValue;
                 } else {
                     if ($hasValue) {

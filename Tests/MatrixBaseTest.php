@@ -8,6 +8,7 @@
 
 namespace Skilla\Matrix\Test;
 
+use Skilla\Matrix\Matrix;
 use Skilla\Matrix\MatrixBase;
 
 class MatrixBaseTest extends \PHPUnit_Framework_TestCase
@@ -137,16 +138,16 @@ class MatrixBaseTest extends \PHPUnit_Framework_TestCase
      */
     public function testIsTriangularLower(MatrixBase $matriz)
     {
-        $matriz->pretty();die();
-        $this->assertFalse($matriz->isTriangularLower());
+        $this->assertTrue($matriz->isTriangularLower());
         $tmp = new MatrixBase(3, 3);
         $tmp->setPoint(1, 1, 1);
+        $tmp->setPoint(1, 3, 1);
         $tmp->setPoint(2, 1, 1);
         $tmp->setPoint(2, 2, 1);
         $tmp->setPoint(3, 1, 1);
         $tmp->setPoint(3, 2, 1);
         $tmp->setPoint(3, 3, 1);
-        $this->assertTrue($tmp->isTriangularLower());
+        $this->assertFalse($tmp->isTriangularLower());
         return $matriz;
     }
 
@@ -157,6 +158,8 @@ class MatrixBaseTest extends \PHPUnit_Framework_TestCase
      */
     public function testIsDiagonal(MatrixBase $matriz)
     {
+        $this->assertFalse($matriz->isDiagonal());
+        $matriz->setPoint(3, 1, 0);
         $this->assertTrue($matriz->isDiagonal());
         return $matriz;
     }
@@ -168,11 +171,11 @@ class MatrixBaseTest extends \PHPUnit_Framework_TestCase
      */
     public function testIsMatrixEquals(MatrixBase $matriz)
     {
-        $tmp = new MatrixBase(3, 2);
+        $tmp = new Matrix(3, 2);
         $this->assertFalse($matriz->isMatrixEquals($tmp));
-        $tmp = new MatrixBase(2, 3);
+        $tmp = new Matrix(2, 3);
         $this->assertFalse($matriz->isMatrixEquals($tmp));
-        $tmp = new MatrixBase(3, 3);
+        $tmp = new Matrix(3, 3);
         $this->assertFalse($matriz->isMatrixEquals($tmp));
         $tmp->setPoint(1, 1, 1);
         $tmp->setPoint(2, 2, 1);

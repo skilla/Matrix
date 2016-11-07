@@ -206,8 +206,8 @@ class Matrix
     public function printPretty($precision = null)
     {
         $precision = $this->getPrecision($precision);
-        for ($col=1; $col<=$this->getNumCols(); $col++) {
-            for ($row = 1; $row <= $this->getNumRows(); $row++) {
+        for ($row = 1; $row <= $this->getNumRows(); $row++) {
+            for ($col=1; $col<=$this->getNumCols(); $col++) {
                 echo str_pad($this->getPoint($row, $col), $precision+10, ' ', STR_PAD_LEFT)."  ";
             }
             echo "\n";
@@ -215,10 +215,10 @@ class Matrix
     }
 
     /**
-     * @param $precision
+     * @param int|null $precision
      * @return int
      */
-    private function getPrecision($precision)
+    public function getPrecision($precision = null)
     {
         return is_null($precision) ? $this->precision : (int)$precision;
     }
