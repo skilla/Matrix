@@ -4,7 +4,12 @@
     "keywords":        ["Matrix", "Determinant", "Inverse", "Matriz", "Determinante", "Inversa"],
     "type":            "library",
     "license":         "GNU",
-
+    "authors": [
+        {
+            "name": "Sergio Zambrano Delfa",
+            "email": "sergio.zambrano@gmail.com"
+        }
+    ],
     "require": {
         "php":         ">=5.3.0"
     },
