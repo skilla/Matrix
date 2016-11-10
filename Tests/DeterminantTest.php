@@ -36,7 +36,7 @@ class DeterminantTest extends \PHPUnit_Framework_TestCase
     {
         $matrix = new Matrix(2, 2);
         $sut = new Determinant($matrix);
-        $sut->determinantOrderOne();
+        $sut->forOrderOne();
     }
 
     public function testDeterminantOrderOne()
@@ -45,10 +45,10 @@ class DeterminantTest extends \PHPUnit_Framework_TestCase
         $matrix->setPoint(1, 1, 23);
         $sut = new Determinant($matrix, 6);
 
-        $result = $this->checkAbsoluteEquals('23.000000', $sut->determinantOrderOne());
+        $result = $this->checkAbsoluteEquals('23.000000', $sut->forOrderOne());
         $this->assertTrue($result);
 
-        $result = $this->checkAbsoluteEquals('23.000000', $sut->determinant());
+        $result = $this->checkAbsoluteEquals('23.000000', $sut->retrieve());
         $this->assertTrue($result);
     }
 
@@ -59,7 +59,7 @@ class DeterminantTest extends \PHPUnit_Framework_TestCase
     {
         $matrix = new Matrix(1, 1);
         $sut = new Determinant($matrix);
-        $sut->determinantOrderTwo();
+        $sut->forOrderTwo();
     }
 
     public function testDeterminantOrderTwo()
@@ -71,10 +71,10 @@ class DeterminantTest extends \PHPUnit_Framework_TestCase
         $matrix->setPoint(2, 2, -4.7);
         $sut = new Determinant($matrix);
 
-        $result = $this->checkAbsoluteEquals('-83.600000', $sut->determinantOrderTwo());
+        $result = $this->checkAbsoluteEquals('-83.600000', $sut->forOrderTwo());
         $this->assertTrue($result);
 
-        $result = $this->checkAbsoluteEquals('-83.600000', $sut->determinant());
+        $result = $this->checkAbsoluteEquals('-83.600000', $sut->retrieve());
         $this->assertTrue($result);
     }
 
@@ -85,7 +85,7 @@ class DeterminantTest extends \PHPUnit_Framework_TestCase
     {
         $matrix = new Matrix(1, 1);
         $sut = new Determinant($matrix);
-        $sut->determinantOrderThree();
+        $sut->forOrderThree();
     }
 
     public function testDeterminantOrderThree()
@@ -102,10 +102,10 @@ class DeterminantTest extends \PHPUnit_Framework_TestCase
         $matrix->setPoint(3, 3, 4);
         $sut = new Determinant($matrix);
 
-        $result = $this->checkAbsoluteEquals('-845.280000', $sut->determinantOrderThree());
+        $result = $this->checkAbsoluteEquals('-845.280000', $sut->forOrderThree());
         $this->assertTrue($result);
 
-        $result = $this->checkAbsoluteEquals('-845.280000', $sut->determinant());
+        $result = $this->checkAbsoluteEquals('-845.280000', $sut->retrieve());
         $this->assertTrue($result);
     }
 
@@ -116,7 +116,7 @@ class DeterminantTest extends \PHPUnit_Framework_TestCase
     {
         $matrix = new Matrix(1, 1);
         $sut = new Determinant($matrix);
-        $sut->determinantOrderN();
+        $sut->forOrderN();
     }
 
     public function testDeterminantOrderN()
@@ -140,11 +140,11 @@ class DeterminantTest extends \PHPUnit_Framework_TestCase
         $matrix->setPoint(4, 4, 5);
         $sut = new Determinant($matrix);
 
-        $result = $this->checkAbsoluteEquals('-286.000000', $sut->determinantOrderN());
+        $result = $this->checkAbsoluteEquals('-286.000000', $sut->forOrderN());
         $this->assertTrue($result);
 
 
-        $result = $this->checkAbsoluteEquals('-286.000000', $sut->determinant());
+        $result = $this->checkAbsoluteEquals('-286.000000', $sut->retrieve());
         $this->assertTrue($result);
     }
 
@@ -155,7 +155,7 @@ class DeterminantTest extends \PHPUnit_Framework_TestCase
     {
         $matrix = new Matrix(4, 4, 6);
         $sut = new Determinant($matrix);
-        return $sut->determinant();
+        return $sut->retrieve();
     }
 
     /**

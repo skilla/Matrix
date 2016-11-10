@@ -56,34 +56,43 @@ class Operations
 
         $adjugate = new Matrix($this->matrix->getNumRows(), $this->matrix->getNumCols(), $this->precision);
 
+        $determinant = new Determinant($this->matrix, $this->precision);
         for ($i=1; $i<=$this->matrix->getNumRows(); $i++) {
             for ($j=1; $j<=$this->matrix->getNumCols(); $j++) {
-                $adjugate->setPoint($j, $i, $this->cofactor($i, $j));
+                $cofactor = $determinant->cofactor($i, $j);
+                $point = new Determinant($cofactor, $this->precision);
+                $adjugate->setPoint($j, $i, $point->retrieve());
             }
         }
         return $adjugate;
     }
 
-    public function cofactorMatrix()
+    public function inverse()
     {
-        if (!$this->properties->isSquare()) {
-            throw new NotSquareException();
+        $determinant = new Determinant($this->matrix);
+        $factor = $determinant->retrieve();
+        if ($factor === $this->valueZero) {
+            throw new NotInverseException();
         }
+        $factor = 1/$factor;
 
-
+        $transposed = $this->transposed();
+        $operations = new Operations($transposed, $this->precision);
+        $adjugate = $operations->adjugateMatrix();
+        $operations = new Operations($adjugate, $this->precision);
+        return $operations->multiplicationScalar($factor);
     }
 
-    public function determinant()
+    public function multiplicationScalar($multiplier)
     {
-        if (!$this->properties->isSquare()) {
-            throw new NotSquareException();
+        $result = new Matrix($this->matrix->getNumRows(), $this->matrix->getNumCols(), $this->precision);
+
+        for ($row=1; $row<=$this->matrix->getNumRows(); $row++) {
+            for ($col=1; $col<=$this->matrix->getNumCols(); $col++) {
+                $newValue = bcmul($this->matrix->getPoint($row, $col), $multiplier, $this->precision);
+                $result->setPoint($row, $col, $newValue);
+            }
         }
-        if ($this->matrix->getNumRows()===1) {
-            return $this->matrix->getPoint(1, 1);
-        } elseif ($this->matrix->getNumRows()===2) {
-            $mainDiagonal = bcmul($this->matrix->getPoint(1, 1), $this->matrix->getPoint(2, 2), $this->precision);
-            $secondaryDiagonal = bcmul($this->matrix->getPoint(1, 2), $this->matrix->getPoint(2, 1), $this->precision);
-            return bcsub($mainDiagonal, $secondaryDiagonal, $this->precision);
-        }
+        return $result;
     }
 }

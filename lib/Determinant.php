@@ -31,15 +31,16 @@ class Determinant
 
     /**
      * @return string
+     * @throws OperationNotAllowedException
      */
-    public function determinant()
+    public function retrieve()
     {
         $functions = array(
             '',
-            'determinantOrderOne',
-            'determinantOrderTwo',
-            'determinantOrderThree',
-            'determinantOrderN',
+            'forOrderOne',
+            'forOrderTwo',
+            'forOrderThree',
+            'forOrderN',
         );
         if ($this->matrix->getNumRows() > 3) {
             $order = 4;
@@ -54,7 +55,7 @@ class Determinant
      * @return string
      * @throws OperationNotAllowedException
      */
-    public function determinantOrderOne()
+    public function forOrderOne()
     {
         if ($this->matrix->getNumRows()!==1) {
             throw new OperationNotAllowedException('determinantOrderOne only allowed on 1x1 matrix');
@@ -67,7 +68,7 @@ class Determinant
      * @return string
      * @throws OperationNotAllowedException
      */
-    public function determinantOrderTwo()
+    public function forOrderTwo()
     {
         if ($this->matrix->getNumRows()!==2) {
             throw new OperationNotAllowedException('determinantOrderTwo only allowed on 2x2 matrix');
@@ -82,7 +83,7 @@ class Determinant
      * @return string
      * @throws OperationNotAllowedException
      */
-    public function determinantOrderThree()
+    public function forOrderThree()
     {
         if ($this->matrix->getNumRows()!==3) {
             throw new OperationNotAllowedException('determinantOrderThree only allowed on 3x3 matrix');
@@ -115,14 +116,18 @@ class Determinant
         return $result;
     }
 
-    public function determinantOrderN()
+    /**
+     * @return string
+     * @throws OperationNotAllowedException
+     */
+    public function forOrderN()
     {
         if ($this->matrix->getNumRows()<=3) {
             throw new OperationNotAllowedException('determinantOrderN only allowed on 4x4 or greater matrix');
         }
         $this->gaussReduction();
         $determinant = new Determinant($this->cofactor(1, 1));
-        return bcmul($this->matrix->getPoint(1, 1), $determinant->determinant(), $this->precision);
+        return bcmul($this->matrix->getPoint(1, 1), $determinant->retrieve(), $this->precision);
     }
 
     public function gaussReduction()
@@ -130,11 +135,11 @@ class Determinant
         $this->sortRows();
         $this->reduceToOne();
         for ($row=2; $row<=$this->matrix->getNumRows(); $row++) {
-            $multiplicator = $this->matrix->getPoint($row, 1);
-            $multiplicator = bcmul($multiplicator, '-1', $this->precision);
+            $multiplier = $this->matrix->getPoint($row, 1);
+            $multiplier = bcmul($multiplier, '-1', $this->precision);
             for ($col=1; $col<=$this->matrix->getNumCols(); $col++) {
                 $oldValue = $this->matrix->getPoint($row, $col);
-                $addition = bcmul($this->matrix->getPoint(1, $col), $multiplicator, $this->precision);
+                $addition = bcmul($this->matrix->getPoint(1, $col), $multiplier, $this->precision);
                 $newValue = bcadd($oldValue, $addition, $this->precision);
                 $this->matrix->setPoint($row, $col, $newValue);
             }
@@ -163,7 +168,7 @@ class Determinant
         for ($col=1; $col<=$this->matrix->getNumRows(); $col++) {
             $newValue = bcdiv($this->matrix->getPoint(1, $col), $divisor, $this->precision);
             $this->matrix->setPoint(1, $col, $newValue);
-            $newValue = bcMul($this->matrix->getPoint(2, $col), $divisor, $this->precision);
+            $newValue = bcmul($this->matrix->getPoint(2, $col), $divisor, $this->precision);
             $this->matrix->setPoint(2, $col, $newValue);
         }
     }
@@ -173,6 +178,11 @@ class Determinant
         return bccomp($value, $this->valueZero, $this->precision);
     }
 
+    /**
+     * @param $i
+     * @param $j
+     * @return Matrix
+     */
     public function cofactor($i, $j)
     {
         $cofactor = new Matrix($this->matrix->getNumRows() - 1, $this->matrix->getNumCols() - 1, $this->precision);

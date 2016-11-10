@@ -360,7 +360,7 @@ class MatrixBaseTest extends \PHPUnit_Framework_TestCase
      */
     public function testMultiplica1(MatrixBase $matriz)
     {
-        $tmp1 = new MatrixBase(3, 3, 5);
+        $tmp1 = new Matrix(3, 3, 5);
         $tmp1->setPoint(1, 1, 2);
         $tmp1->setPoint(1, 2, 0);
         $tmp1->setPoint(1, 3, 1);
@@ -371,7 +371,7 @@ class MatrixBaseTest extends \PHPUnit_Framework_TestCase
         $tmp1->setPoint(3, 2, 1);
         $tmp1->setPoint(3, 3, 1);
 
-        $tmp2 = new MatrixBase(3, 3, 5);
+        $tmp2 = new Matrix(3, 3, 5);
         $tmp2->setPoint(1, 1, 1);
         $tmp2->setPoint(1, 2, 0);
         $tmp2->setPoint(1, 3, 1);
@@ -382,7 +382,7 @@ class MatrixBaseTest extends \PHPUnit_Framework_TestCase
         $tmp2->setPoint(3, 2, 1);
         $tmp2->setPoint(3, 3, 0);
 
-        $tmp3 = new MatrixBase(3, 3, 5);
+        $tmp3 = new Matrix(3, 3, 5);
         $tmp3->setPoint(1, 1, 3);
         $tmp3->setPoint(1, 2, 1);
         $tmp3->setPoint(1, 3, 2);

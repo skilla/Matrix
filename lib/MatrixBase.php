@@ -315,136 +315,15 @@ class MatrixBase
     public function getAdjunto($i, $j, $precision = null)
     {
         $precision = $this->getPrecision($precision);
-        $class = get_class($this);
-        /**
-         * @var MatrixBase $tr
-         */
-        $tr = new $class($this->getNumRows() - 1, $this->getNumCols() - 1, $precision);
-        for ($m=1; $m<=$this->getNumRows(); $m++) {
-            for ($n=1; $n<=$this->getNumCols(); $n++) {
-                if ($m==$i || $n==$j) {
-                    continue;
-                }
-                $row = ($m<$i) ? $m : $m-1;
-                $col = ($n<$j) ? $n : $n-1;
-                $tr->setPoint($row, $col, $this->getPoint($m, $n, $precision), $precision);
-            }
-        }
-        return $tr;
+        $determinant = new Determinant($this->matrix, $precision);
+        return $determinant->cofactor($i, $j);
     }
 
     public function determinant($precision = null)
     {
         $precision = $this->getPrecision($precision);
-        $determinante = $this->valueZero;
-        if ($this->isSquare()) {
-            if ($this->getNumRows()==1) {
-                $determinante = $this->getPoint(1, 1, $precision);
-            }
-            if ($this->getNumRows()==2) {
-                $determinante = bcsub(
-                    bcmul(
-                        $this->getPoint(1, 1, $precision),
-                        $this->getPoint(2, 2, $precision),
-                        $precision
-                    ),
-                    bcmul(
-                        $this->getPoint(1, 2, $precision),
-                        $this->getPoint(2, 1, $precision),
-                        $precision
-                    ),
-                    $precision
-                );
-            }
-            if ($this->getNumRows()==3) {
-                $determinante = bcadd(0, 0, $precision);
-                $punto1 = bcmul(
-                    $this->getPoint(1, 1, $precision),
-                    $this->getPoint(2, 2, $precision),
-                    $precision
-                );
-                $punto1 = bcmul(
-                    $punto1,
-                    $this->getPoint(3, 3, $precision),
-                    $precision
-                );
-                $determinante = bcadd($determinante, $punto1, $determinante);
-                $punto1 = bcmul(
-                    $this->getPoint(1, 2, $precision),
-                    $this->getPoint(2, 3, $precision),
-                    $precision
-                );
-                $punto1 = bcmul(
-                    $punto1,
-                    $this->getPoint(3, 1, $precision),
-                    $precision
-                );
-                $determinante = bcadd($determinante, $punto1, $determinante);
-                $punto1 = bcmul(
-                    $this->getPoint(1, 3, $precision),
-                    $this->getPoint(2, 1, $precision),
-                    $precision
-                );
-                $punto1 = bcmul(
-                    $punto1,
-                    $this->getPoint(3, 2, $precision),
-                    $precision
-                );
-                $determinante = bcadd($determinante, $punto1, $determinante);
-                $punto1 = bcmul(
-                    $this->getPoint(3, 1, $precision),
-                    $this->getPoint(2, 2, $precision),
-                    $precision
-                );
-                $punto1 = bcmul(
-                    $punto1,
-                    $this->getPoint(1, 3, $precision),
-                    $precision
-                );
-                $determinante = bcsub($determinante, $punto1, $determinante);
-                $punto1 = bcmul(
-                    $this->getPoint(3, 2, $precision),
-                    $this->getPoint(2, 3, $precision),
-                    $precision
-                );
-                $punto1 = bcmul(
-                    $punto1,
-                    $this->getPoint(1, 1, $precision),
-                    $precision
-                );
-                $determinante = bcsub($determinante, $punto1, $determinante);
-                $punto1 = bcmul(
-                    $this->getPoint(3, 3, $precision),
-                    $this->getPoint(2, 1, $precision),
-                    $precision
-                );
-                $punto1 = bcmul(
-                    $punto1,
-                    $this->getPoint(1, 2, $precision),
-                    $precision
-                );
-                $determinante = bcsub($determinante, $punto1, $determinante);
-            }
-            if ($this->getNumRows()>3) {
-                $determinante = $this->valueZero;
-                for ($j=1; $j<=$this->getNumCols(); $j++) {
-                    $determinante = bcadd(
-                        $determinante,
-                        bcmul(
-                            bcmul(
-                                $this->getPoint(1, $j, $precision),
-                                pow(-1, 1+$j),
-                                $precision
-                            ),
-                            $this->getAdjunto(1, $j)->determinant(),
-                            $precision
-                        ),
-                        $precision
-                    );
-                }
-            }
-        }
-        return $determinante;
+        $determinant = new Determinant($this->matrix, $precision);
+        return $determinant->retrieve();
     }
 
     /**
