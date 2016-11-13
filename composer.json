@@ -1,7 +1,7 @@
 {
     "name":            "skilla/matrix",
     "description":     "Library for mathematical calculations with Matrix. Librería para cálculo matématico con matrices",
-    "keywords":        ["Matrix", "Determinant", "Inverse", "Matriz", "Determinante", "Inversa"],
+    "keywords":        ["Math", "Mathematical", "Matrix", "Determinant", "Inverse", "Matriz", "Matemáticas", "Determinante", "Inversa"],
     "type":            "library",
     "license":         "GNU",
 
